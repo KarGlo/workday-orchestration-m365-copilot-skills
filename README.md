@@ -17,7 +17,7 @@ The ready-to-upload `.zip` packages on the Releases page contain the same text f
 ```
 agent/
 ├── agent-profile.md                 name, description, starter prompts, recommended settings
-├── instructions-with-skills.md      agent instructions for variant A (4,958 of 8,000 characters)
+├── instructions-with-skills.md      agent instructions for variant A (5,163 of 8,000 characters)
 └── instructions-without-skills.md   agent instructions for variant B (5,235 of 8,000 characters)
 skills/
 ├── workday-orchestration-design/            templates, triggers, tenant wiring, limits, lifecycle, 13 recipes
@@ -62,6 +62,25 @@ pick one variant per agent.
 6. **Starter prompts**: add the six from `agent/agent-profile.md`.
 7. Optional **Knowledge**: the public website `https://developer.workday.com/documentation`.
 8. **Try it**: run the starter prompts, then create and share the agent.
+
+## Set up variant A when Skills accepts `.md` files
+
+Some Agent Builder versions take a single Markdown file under **Skills > Add** instead of a
+`.zip`. Then:
+
+1. Download `upload-files.zip` from the latest [release](../../releases) and extract it. It holds
+   `skills/<skill-name>/SKILL.md` (6 files) and `knowledge/` (the 12 `.txt` reference files).
+2. **New agent** > **Skip to configure**; Name and Description from `agent/agent-profile.md`.
+3. **Instructions**: paste `agent/instructions-with-skills.md`.
+4. **Skills** > **Add**: upload each of the six `SKILL.md` files.
+5. **Knowledge** > **Attachments**: upload all 12 files from `knowledge/` — the skills look them up
+   there by file name.
+6. Add the starter prompts and test with **Try it**, for example "Which functions extract a value
+   from a JSON response?" — the answer should quote signatures from `functions-structured-data.txt`.
+
+Microsoft lists "agents with both skills and embedded files" as a known preview limitation. If the
+agent won't save or ignores the attachments, put the 12 `.txt` files in a OneDrive or SharePoint
+folder and add that folder through **Add knowledge** instead, or use variant B.
 
 ## Set up variant B (knowledge files)
 

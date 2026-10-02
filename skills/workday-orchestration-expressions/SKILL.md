@@ -5,18 +5,22 @@ description: Write, explain, fix and convert Workday Orchestrate expressions in 
 
 # Workday Orchestrate expressions
 
-## Reference files in this skill
+## Reference files
 
-- `references/syntax.txt` — Expression Builder modes, how to reference step outputs, interpolation,
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `syntax.txt` — Expression Builder modes, how to reference step outputs, interpolation,
   conditionals, types, JSONPath and XPath support, text template syntax, usage statistics.
-- `references/functions-global.txt` — every global function (attrstore, bp, context, date,
+- `functions-global.txt` — every global function (attrstore, bp, context, date,
   datetime, documents, InstanceRef, intsys, list, localtime, lp, map, mapping, math, no-qualifier,
   random, resource, system, zoneddatetime).
-- `references/functions-strings-text.txt` — String, Text, StringList, StringMap, Boolean.
-- `references/functions-structured-data.txt` — Data, Json, JsonKeyValue, Xml, Csv, CsvRow,
+- `functions-strings-text.txt` — String, Text, StringList, StringMap, Boolean.
+- `functions-structured-data.txt` — Data, Json, JsonKeyValue, Xml, Csv, CsvRow,
   DocumentAccessor, FileInfo(List), HttpHeaders, HttpQueryParams, InstanceReference(List),
   Iterator, JoinResiduals, MatchedWith, ProcessingError.
-- `references/functions-numbers-dates-collections.txt` — BigDecimal, Number, NumberList/Map,
+- `functions-numbers-dates-collections.txt` — BigDecimal, Number, NumberList/Map,
   BooleanList/Map, Date, DateList/Map, LocalDateTime(List/Map), LocalTime(List/Map),
   ZonedDateTime(List/Map).
 
@@ -38,7 +42,7 @@ description: Write, explain, fix and convert Workday Orchestrate expressions in 
    is missing. Use the `...WithDefault` / `...OrEmptyString` variant unless a missing value must
    fail the run — then say that the failure is intended.
 5. **Check the path syntax** against the supported and unsupported JSONPath and XPath tables in
-   `references/syntax.txt` (for example negative indices and root-referencing filters are not
+   `syntax.txt` (for example negative indices and root-referencing filters are not
    supported; at most 10,000 primitives per JSONPath).
 6. **Mind memory.** Avoid `toString()` on large file-backed documents; iterate with
    `iterator(...)` and a Loop instead of materialising big strings.

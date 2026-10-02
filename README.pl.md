@@ -17,7 +17,7 @@ wykonywalnych. Gotowe paczki `.zip` w zakładce Releases zawierają te same plik
 ```
 agent/
 ├── agent-profile.md                 nazwa, opis, startery rozmów, zalecane ustawienia
-├── instructions-with-skills.md      instrukcje agenta, wariant A (4 958 z 8 000 znaków)
+├── instructions-with-skills.md      instrukcje agenta, wariant A (5 163 z 8 000 znaków)
 └── instructions-without-skills.md   instrukcje agenta, wariant B (5 235 z 8 000 znaków)
 skills/
 ├── workday-orchestration-design/            szablony, wyzwalacze, konfiguracja w tenancie, limity, cykl życia, 13 przepisów
@@ -61,6 +61,25 @@ plikami — w jednym agencie wybierz jeden wariant.
 6. **Starter prompts**: dodaj sześć z `agent/agent-profile.md`.
 7. Opcjonalnie **Knowledge**: publiczna strona `https://developer.workday.com/documentation`.
 8. **Try it**: przetestuj startery, potem utwórz i udostępnij agenta.
+
+## Wariant A, gdy Skills przyjmuje pliki `.md`
+
+Niektóre wersje Agent Builder przyjmują w **Skills > Add** pojedynczy plik Markdown zamiast
+`.zip`. Wtedy:
+
+1. Pobierz `upload-files.zip` z najnowszego [release](../../releases) i rozpakuj. Zawiera
+   `skills/<nazwa-skilla>/SKILL.md` (6 plików) i `knowledge/` (12 plików `.txt` z referencjami).
+2. **New agent** > **Skip to configure**; Name i Description z `agent/agent-profile.md`.
+3. **Instructions**: wklej `agent/instructions-with-skills.md`.
+4. **Skills** > **Add**: wgraj kolejno sześć plików `SKILL.md`.
+5. **Knowledge** > **Attachments**: wgraj wszystkie 12 plików z `knowledge/` — skille szukają ich
+   tam po nazwie pliku.
+6. Dodaj startery i przetestuj w **Try it**, np. „Które funkcje wyciągają wartość z odpowiedzi
+   JSON?” — odpowiedź powinna cytować sygnatury z `functions-structured-data.txt`.
+
+Microsoft wymienia „agentów ze skillami i wgranymi plikami jednocześnie” jako znane ograniczenie
+wersji preview. Jeśli agent nie chce się zapisać albo ignoruje załączniki, wrzuć 12 plików `.txt`
+do folderu w OneDrive lub SharePoint i dodaj go przez **Add knowledge**, albo użyj wariantu B.
 
 ## Konfiguracja wariantu B (pliki wiedzy)
 

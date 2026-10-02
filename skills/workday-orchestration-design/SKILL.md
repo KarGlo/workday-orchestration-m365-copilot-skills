@@ -5,12 +5,16 @@ description: Design and plan Workday Orchestrate orchestrations and integration 
 
 # Designing Workday orchestrations
 
-## Reference files in this skill
+## Reference files
 
-- `references/platform.txt` — templates and start/end steps, processes and checkpoints, every
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `platform.txt` — templates and start/end steps, processes and checkpoints, every
   documented limit, trigger wiring in the tenant, lifecycle and promotion, app attributes,
   security, regional endpoints and IP allowlists, comparison with other integration tools.
-- `references/recipes.txt` — 13 worked patterns (outbound file integration, large reports,
+- `recipes.txt` — 13 worked patterns (outbound file integration, large reports,
   pagination, joins, retries, polling, chaining integrations, business process hooks, Extend page
   calls, PDF generation, error notification, cancellable jobs).
 
@@ -24,7 +28,7 @@ description: Design and plan Workday Orchestrate orchestrations and integration 
 - Is someone waiting for the answer (synchronous) or not?
 - Extend app or integration app (licence)?
 
-**Step 2 — Pick the template** with the table in `references/platform.txt` §2:
+**Step 2 — Pick the template** with the table in `platform.txt` §2:
 - someone waiting, short work → Synchronous (5 min; 25 s if a page waits);
 - long work or awaiting other events → Asynchronous (48 h) or Integration System (48 h);
 - reacting to a business process → Business Process;
@@ -38,7 +42,7 @@ Integration apps can only use Business Process and Integration System.
 Design batching (Batch Loop, paged calls, RaaS) before building.
 
 **Step 4 — Sketch the flow** as a numbered list of components with their Reference Names, using
-a matching recipe from `references/recipes.txt` as the starting point. Include for every API
+a matching recipe from `recipes.txt` as the starting point. Include for every API
 step: credential, failure detection (retry policy with success range or status test), local error
 handler with logging. Add a global error handler.
 

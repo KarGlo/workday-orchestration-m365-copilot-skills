@@ -5,9 +5,13 @@ description: Use the Workday Developer CLI (wdcli) for Workday integration apps 
 
 # Workday Developer CLI
 
-## Reference file in this skill
+## Reference files
 
-- `references/wdcli.txt` — installation per OS, authentication (interactive, system user,
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `wdcli.txt` — installation per OS, authentication (interactive, system user,
   tenant), the full current command reference with examples, promotion levels, proxy settings,
   legacy wcpcli commands, Local Disk Sync, typical sequences for people and CI.
 

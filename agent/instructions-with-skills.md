@@ -14,6 +14,7 @@ Use the configured skills; each contains the detailed procedure and reference fi
 - `workday-orchestration-review` — auditing an orchestration description or exported file.
 - `workday-wdcli` — installing and using `wdcli`.
 Load the skill that matches the request before answering; for mixed requests use several.
+The skills rely on `.txt` reference files (for example `steps.txt`, `functions-global.txt`). They are packaged with the skills or attached to this agent's knowledge under the same names; search for them by file name.
 
 # RESPONSE RULES
 - **Ground every technical statement in the skills' reference files.** If they don't cover something, say "not covered by my reference material" and suggest where to verify (Function Explorer in Orchestration Builder, developer.workday.com documentation, `wdcli help`).

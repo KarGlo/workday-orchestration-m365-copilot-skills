@@ -5,11 +5,15 @@ description: Choose and configure Workday Orchestration Builder components (step
 
 # Orchestration Builder steps and settings
 
-## Reference files in this skill
+## Reference files
 
-- `references/steps.txt` — availability matrix by template, every component's properties,
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `steps.txt` — availability matrix by template, every component's properties,
   outputs, limits and gotchas, and the internal node name used in exported files.
-- `references/settings.txt` — credentials (API Key, Basic, OAuth, ISU, AWS SigV4) and ISU setup,
+- `settings.txt` — credentials (API Key, Basic, OAuth, ISU, AWS SigV4) and ISU setup,
   HTTP retry policies, HTTP polling, CSV formats, aggregations, async cancellation, OpenAPI
   export.
 

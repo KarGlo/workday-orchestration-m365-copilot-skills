@@ -5,9 +5,13 @@ description: Review, audit or explain an existing Workday orchestration or subor
 
 # Reviewing orchestrations
 
-## Reference file in this skill
+## Reference files
 
-- `references/review.txt` — how to get the export, the JSON structure, UI ↔ export node names,
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `review.txt` — how to get the export, the JSON structure, UI ↔ export node names,
   the review checklist with severities, observations about Workday samples, and the report
   format.
 

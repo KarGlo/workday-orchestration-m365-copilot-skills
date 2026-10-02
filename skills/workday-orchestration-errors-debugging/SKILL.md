@@ -5,9 +5,13 @@ description: Handle errors and troubleshoot Workday Orchestrate orchestrations �
 
 # Error handling and troubleshooting
 
-## Reference file in this skill
+## Reference files
 
-- `references/errors-debugging.txt` — handler semantics, what counts as a failure, logging
+These `.txt` files are packaged next to this skill (in its `references` folder) or, when the skill was
+uploaded as a single `SKILL.md`, attached to the agent's knowledge under the same file names.
+Look them up by file name in whichever place is available.
+
+- `errors-debugging.txt` — handler semantics, what counts as a failure, logging
   components, step debugger and its limits, Build/Run Log fields, Orchestration Activity statuses,
   verbose logging API, summary report fields, and a symptom → cause table.
 
