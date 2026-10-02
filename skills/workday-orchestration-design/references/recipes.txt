@@ -1,0 +1,90 @@
+# Orchestration recipes
+
+Patterns assembled from Workday's documentation and tutorial ("Create an Outbound Integration
+with Orchestrate") and from Workday's sample orchestrations. Step names are Orchestration Builder
+component names. Adapt names and paths to the tenant.
+
+## R1. Outbound integration: Workday data to a file on the integration event (IS template)
+1. Add Integration Message (INFO, "started") — proves the integration system reaches the flow.
+2. Create Values "ExtractLPs": EffectiveDate = lp.date("Effective Date"), Name = lp.simpleData("Name")
+   (labels exactly as in Maintain Launch Parameters).
+3. Send Workday API Request: GET /staffing/v4/workers, query parameter search =
+   data.ExtractLPs.Name, Response Type Json, credential Default Workday API Credential; local error
+   handler with Log + Add Integration Message (ERROR).
+4. Create Values "CreateNameTitle": name = data.SendWorkdayAPIRequest.response.stringAtJsonPathWithDefault("$.data[0].descriptor", ""),
+   businessTitle = ...("$.data[0].primaryJob.businessTitle", "").
+5. Create Text Template (text/plain): {{data.CreateNameTitle.name}}'s business title is {{data.CreateNameTitle.businessTitle}}
+6. Store Document: Document to Store = data.CreateTextTemplate.message, title, Attach document to
+   integration event = boolean true.
+7. Global error handler: Add Integration Message (ERROR) with
+   s"${"Failed: "}${data.GlobalHandler.processingError.message()}".
+Tenant: Create Integration System (Orchestrate Integration Template), Configure Integration
+Attributes (Orchestration Name, Application Reference ID), Maintain Launch Parameters, Launch /
+Schedule, check Messages and Output Files.
+
+## R2. Large report to CSV
+Send Workday RaaS Request (format query parameter, e.g. json; checkpoint, up to 1 h) → Loop over
+response.asJSON().iterator("$.Report_Entry[*]") → CSV Fold aggregation (CSV format from
+Settings) → Store Document attached to the event. For very large inputs use Batch Loop (Size
+strategy) so each batch is processed and written separately.
+
+## R3. Paginated Workday REST read
+Send Paged Workday REST Call (Limit, Offset 0, Max Pages empty for all, Flatten Result true) →
+Loop over the flattened result. For WWS use Send Paged Workday SOAP Call (Service, Version, body
+without envelope).
+
+## R4. Paginated external API (cursor)
+Send Paged HTTP Request → Pagination: Cursor, "Cursor token in response body", Next Page Parameter
+Name ($.cursor), Next Page Token Path ($.next_cursor), Page Size Parameter/Value, Data Path
+($.items), Flatten result. Don't duplicate the cursor key in Query Parameters.
+
+## R5. Match two datasets by key
+Join Loop: primary = the larger-record dataset iterator; joining = the lookup dataset (≤ 500 MB)
+with Primary Dataset Key / Joining Dataset Key; Missing Match Strategy = Alternate Processing and
+branch on isDataDefined("JoinLoop", "<JoiningOutputName>"); Multiple Match Strategy = Use First or
+Complete with Error. Never nest a Loop with a search inside another Loop for this.
+
+## R6. Fail on non-2xx and retry transient errors
+Settings > HTTP Retries: success range 200-299; set 1: Status Code 408, 409, 423, 425; set 2:
+Status Code 429, 503 with Retry-After Header backoff; Maximum Total Retries e.g. 3; attach the
+policy on each API step's Settings tab. Add a local error handler (Log / Add Integration Message)
+on each API step and a global error handler.
+
+## R7. Wait for an external job (polling)
+Settings > HTTP Polling: Total Polling Duration (≤ 2,880 min), Starting Interval, stop conditions
+(Status Code 200 + Custom: currentStep.response contains "completed"), Error On Timeout. Send HTTP
+Request to the status endpoint with Advanced Mode > Polling Settings. IS or BP template; external
+systems only.
+
+## R8. Chain integrations
+Trigger Integration (IS template): link the child integration system on the Launch Parameters tab,
+map values, pass one document on the Document tab (title, expiry ≤ 1 year), Settings retry covers
+only trigger failure. After the step, branch on the child's status; relaunch from an error handler
+if needed. Can't be used inside a Join Loop.
+
+## R9. Business process side effects
+- Run integration logic as a BP step: BP template + Orchestration Service step (see platform.txt
+  §5), "Advance business process step when orchestration completes" when later steps depend on it.
+- Undo external provisioning on Rescind/Cancel: BP template + Configure Orchestrations with an
+  Orchestration Launch Configuration per action; ISU auth for API calls.
+- Start a custom business process from an orchestration: Trigger Business Process (Async, BP or
+  IS; Target ID + ABP Name; finishes within 90 days; not in suborchestrations).
+
+## R10. Extend page calls an orchestration
+Sync orchestration with start inputs and end outputs; page endpoint POST to
+.../orchestrate/v1/apps/<appId>/orchestrations/<Name>/launch. Keep it under 25 s; otherwise an
+Async orchestration and a status page. Return data via the end step's outputs.
+
+## R11. PDF documents
+Send Workday API Request to fetch the BIRT design (XML) + Send Workday RaaS Request for data →
+Trigger PDF Generation (Locale, Language, Timezone, Apply Report Design Per Row) → Store Document
+(the PDF isn't stored automatically). IS template only.
+
+## R12. Reusable error notification
+Suborchestration "NotifyError" with inputs stepName (String) and message (String): Log + Add
+Integration Message (ERROR, IS only) + optional Send HTTP Request to a chat webhook (no secrets in
+the expression; use a credential). Call it from every local error handler.
+
+## R13. Cancellable long job (Extend Async)
+Settings: allow cancellation, Cancellation Barrier before the first irreversible write. Cancel
+with PUT .../orchestrate/v1/apps/{appId}/orchestrations/{name}/cancel/{X-Orchestrate-Id}.

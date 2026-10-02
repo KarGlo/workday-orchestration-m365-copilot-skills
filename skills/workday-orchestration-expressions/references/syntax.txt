@@ -1,0 +1,189 @@
+# Orchestrate Expression Language: syntax and semantics
+
+Sources: Workday Developer documentation (Concept: Expression Builder; Concept: Adding Conditions in
+Expression Builder; Concept: Orchestrate Data Types; Concept: JSONPath Support; Concept: XPath
+Support; Concept: Text Templates; Concept: Optimizing Create Values Performance), retrieved
+2026-10-02. Usage counts come from 163 orchestration files in Workday's WorkdayDeveloperProgram
+repository (3,101 expressions).
+
+## 1. Where expressions live
+
+Any Orchestration Builder field with a grey plus button is an expression field. An expression can
+contain literal values, global functions, member functions and step outputs.
+
+Expression Builder has two modes:
+- Pill mode (default): guided. Type text to filter. Typing `12345` offers "Add string" and
+  "Add number"; typing `true` offers "Add string" and "Add boolean". Successive string entries are
+  concatenated. Each element offers "Insert to the Left" and "Append Function".
+- Advanced Mode (3-dot menu > Advanced Mode): the expression as editable code. No guardrails;
+  "Revert" returns to the last valid version, "Pill Mode" switches back.
+Copy / Paste in the same 3-dot menu move whole expressions within or between orchestrations.
+Function Explorer (icon, lower-left corner of Orchestration Builder) documents every function
+in-product.
+
+Literal types matter: string "42.5" and number 42.5 are different values. In the boolean field of
+Store Document, "Add boolean true" is correct; "Add string 'true'" is a different value.
+
+## 2. Referencing data from earlier steps
+
+Two equivalent forms, both used by Workday:
+- `data.StepName.outputName`            (1,814 uses in Workday samples)
+- `data("StepName", "outputName")`      (323 uses)
+
+StepName is the step's Reference Name. Output names most used in Workday samples: response (275),
+item (265), message (157), processingError (112), data (75), request (56), responseStatusCode (49),
+queryParams (27), isSuccess (26), itemNumber (17).
+- Start step of a Sync/Async orchestration: the configured inputs (e.g. `data.start.employeeId`),
+  the raw body `data.start.request` (cast with asJSON()), and
+  `data.start.queryParams.getParam("action", emptyString())`.
+- Send Workday API Request / Send HTTP Request: `response` and `responseStatusCode`; test success
+  with `data.Step.responseStatusCode.is2xxStatusCode()` and SOAP faults with
+  `data.Step.response.isSoapFault()`.
+- Create Values: each key you created, e.g. `data.ExtractLPs.EffectiveDate`.
+- Create Text Template: `message`.
+- Create JSON: `data`.
+- Loop / Join Loop: the current item `data.LoopName.item`, and the iteration number
+  `data.LoopName.itemNumber`.
+- An error handler attached to a loop is reached in Workday samples as
+  `data._group_LoopName.processingError` (observed naming; confirm in Expression Builder).
+- Join Loop: the output names configured for primary and joining datasets;
+  `isDataDefined("JoinLoop", "Demographics")` tests whether a joining record matched.
+- Error handler: `processingError`, e.g. `data.MyHandler.processingError.message()`.
+- Conditional Outputs error handler: `isSuccess` (boolean).
+- Validate: `allValid`, `anyError`, `anyWarning`, `failedValidations`.
+- Loop with Early Stop Condition: `did.Stop.Early` (name as documented).
+- Store Document: `entryId`, `refId`.
+- Group of steps: only the last step's outputs are visible downstream.
+
+`isDataDefined(producerID, outputName)` returns true when the step/output combination exists.
+
+## 3. Strings, interpolation and conditionals (Advanced Mode text)
+
+Interpolated string (520 uses):
+    s"${"Error in the report call. "}${data.RaaSCall.processingError.message()}"
+Triple-quoted interpolated string (129 uses):
+    s"""${"/compensation/v2/workers/Employee_ID="}${data.start.employeeId}${"/requestOneTimePayment"}"""
+Conditional expression (67 uses):
+    if (data.Flags.isTenantMatch == true) data.JoinLoop.A.stringAtJsonPath("$.id") else data.JoinLoop.B.stringAtJsonPath("$.id")
+Operators seen in Advanced Mode: ==, !=, &&, ||, +, and member functions such as .not(), .or(),
+.and(), .equals(), .greaterThan().
+Avoid `if (cond) true else false` — the condition is already a Boolean (review rule
+OrchestrationVerboseBooleanCheckRule).
+
+Pill-mode conditions ("Add condition for value"): value + relational operator + value; several
+conditions combine with "All of these conditions must be met" (AND) or "One of these conditions
+must be met" (OR); then define the output "If conditions are true" / "If conditions are false".
+Conditions can be nested.
+
+Empty string: `emptyString()`. Emptiness test: `empty(value)` for strings, lists and maps.
+
+## 4. Types
+
+Orchestrate is strongly typed; Expression Builder shows each function's return type and parameter
+types and flags incorrect assignments.
+- DataType: generic document (HTTP launch body, API response). Cast with asJSON(), asXML(),
+  asCSV(), asTEXT() to use type-specific functions. Binary content (images) needn't be cast.
+- TextType (subtype of DataType): text documents, may be file-backed (large).
+- StringType (extends TextType): held in memory.
+- toString() copies a value into memory — on large file-backed data this can create two in-memory
+  copies. Convert only when necessary.
+- Collections are processed through iterators: `json.iterator("$.data[*]")`,
+  `xml.iterator("/path")`; feed the iterator to a Loop.
+- AutoType (in Create Values, Loop, Batch Loop, Join Loop): Orchestrate infers the type and
+  follows changes.
+The runtime streams documents; values above a size threshold live in temporary files on disk.
+
+## 5. JSONPath support
+
+Supported:
+- dot / subscript:            $.data[0].descriptor   $['data'][0]['descriptor']
+- recursive:                  $..primarySupervisoryOrganization.descriptor
+- multiple fields:            $.data[0]['descriptor', 'primaryWorkEmail']
+- indices and ranges:         $.data[0,1].descriptor   $.data[0:3].descriptor   $..[0,1].descriptor
+- wildcards:                  $.*.*.descriptor   $.array[*]
+- slices:                     $.array[1:4]  $.array[1:]  $.array[:4]  $.data[0:3:2].descriptor
+- filters:                    $.data[?(@.id=='1da8b422311b4929bfa4520f7f0b4e83')]['descriptor']
+- regex filter:               $.foo[?(@bar ~= ^baz.*)]
+- array at simple path:       $.data
+Not supported:
+- filters referring to root:  $.foo[?($.bar == 'baz')]
+- comparisons where both sides are subqueries: $.foo.bar[?(@['foo'] < @['baz'])]
+- recursive filters:          $..[?($.bar == 'baz')]
+- chained filters:            $.foo[?(@bar =='foo')][?(@foo =='bar')]
+- recursive paths ending in all matches: $.foo..*   $.foo..[*]
+- negative indices:           $.foo[-1]
+Maximum number of primitives selectable with one JSONPath: 10,000.
+
+Accessor safety: `stringAtJsonPath` and the other non-default accessors throw when the value is
+missing. Prefer `...AtJsonPathWithDefault(path, default)` or `stringAtJsonPathOrEmptyString(path)`
+unless a missing value should fail the run. In Workday samples: stringAtJsonPath 202 uses,
+stringAtJsonPathWithDefault 80, stringAtJsonPathOrEmptyString 23.
+
+## 6. XPath support
+
+XPath applies to XML objects; cast strings with asXML() first. Accessors are typed and named like
+the JSON ones (stringAtXPath, numberAtXPath, ...). Most return leaf values only (element text or
+attribute). Three functions can select fragments: iterator, fragmentAtXPath, countItemsAtXPath.
+A `[type]AtXPath` call that finds no node fails the orchestration — use the WithDefault variant,
+e.g. stringAtXPathWithDefault.
+
+Supported: absolute paths; index predicates `[1]`; attribute predicates `[@wd:type='Employee_ID']`;
+descendant-value predicates `[wd:Company='Octan Enterprises']`; presence predicates
+`[wd:Custom_ID_Shared_Reference]`; nested predicates (but not nested index predicates); `*`;
+`//` (all matching nodes below a node). Predicates can't nest more than 1 level.
+Predicate functions: contains, starts-with, ends-with, position, true, false, boolean, lang,
+ceiling, round, floor, number (argument required), sum, count, substring, substring-before,
+substring-after, string (argument required), string-length (argument required),
+normalize-space (argument required), text.
+Operators: or, and, =, !=, >, <, >=, <=, +, -, *, div, mod.
+Namespaces are declared in orchestration settings and used with prefixes (env:, wd:).
+
+## 7. Text templates (Create Text Template and template bodies of HTTP steps)
+
+Content types: application/json, application/octet-stream, application/x-www-form-urlencoded,
+application/xml, text/csv, text/html, text/plain, text/xml.
+Expressions go between double braces: Hello {{data.assign.name}}. Literal "{{" is written \{{.
+The template runtime streams, so embedding large documents is efficient.
+
+- Conditional:   {{#if data.assign.customer}} valued customer{{/if}}
+- Loop:          {{#each data.assign.response.iterator("$.workers[*]")}}Worker: {{this.stringAtJsonPath("$.name")}}{{/each}}
+                 named items: {{#each data.assign.response.iterator("$.workers[*] as worker")}}{{item.worker.stringAtJsonPath("$.name")}}{{/each}}
+                 XML iterators return elements, not strings. Loops can nest.
+- Alias:         {{#alias json}} {{data.assign.response}} {{/alias}} ... {{alias.json.stringAtJsonPath("$.workers[2].name")}}
+                 (evaluated once however often it is used)
+- With:          {{#with data.assign.response}} {{this.stringAtJsonPath("$.name")}} {{/with}}
+                 `this` is the nearest with-value or each-item.
+- Shorthand:     data("assign","response") == data.assign.response
+- Function:      {{#function isThirty(age: Number) }}{{age > 30}}{{/function}} ... {{function.isThirty(30)}}
+                 one expression per body, declared above use, returns a value, writes nothing.
+- Named template: {{#template t(str: String, max: Number) }}...{{/template}} ... {{template.t("hello", 3)}}
+                 writes output; reads parameters with data.t.str; can't be called from a function or alias.
+- Comment:       {{! comment }}  or  {{!-- comment --}}
+- Continuation:  line ending with \ joins the next line; ending with \\ also drops the next line's
+                 leading whitespace; a literal trailing backslash is {{"\\"}}.
+Operators inside templates: + - * / %  == != >= > <= <  && ||  unary ! + -.
+Argument types for functions and named templates include Any, Boolean, Number, String, Date
+Local, DateTime, ZonedDateTime, LocalTime, list/map/iterator variants of these, Json, Xml, Csv,
+CsvRow, Text Headers, QueryParams, HttpPartInfo, HttpParts, MatchedWith, JoinResiduals,
+MatchedWithIterator, OAuthToken Data.
+
+## 8. Global function families most used in practice
+
+- context.appReferenceId() (85 uses), context.tenant(), context.orchestrateId(), context.subject().
+- lp.* — launch parameters of an Integration System run, e.g. lp.stringParam("Name"),
+  lp.booleanParam("Output No Files"), lp.referenceDataList(name, "WID"), lp.date("Effective Date").
+  Labels must match the integration system's launch parameter names exactly.
+- intsys.* — integration system attributes and services, e.g. intsys.stringAttributeValue("ReportCall"),
+  intsys.stringAttributeValueWithDefault(name, "25").
+- attrstore.stringValue / numberValue / booleanValue("name") — app attributes; throw when missing
+  or of the wrong type.
+- documents.*, system.namedLogFile(...), zoneddatetime.now(), datetime.now(), date.now(),
+  math.plus/minus/div, random.randomUUID().
+Full signatures: functions-global.txt.
+
+## 9. Create Values performance
+
+Values in one Create Values step that depend on each other (e.g. fullName built from firstName in
+the same step) are computed sequentially. Independent values can be computed in parallel.
+Group independent values together and put dependent values in a separate step.
+Documented gain: 100+ independent pairs up to 4x faster; 50-99 pairs 1.5-2x; below 50 minimal.

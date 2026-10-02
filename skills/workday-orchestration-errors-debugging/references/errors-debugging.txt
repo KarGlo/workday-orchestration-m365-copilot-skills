@@ -1,0 +1,142 @@
+# Error handling, logging, debugging and monitoring in Workday Orchestrate
+
+Sources: Workday Developer documentation (Handle Errors; Define HTTP Retry Policies; Define HTTP
+Polling Configurations; Reference: Validate / Continue on Conditions / Log / Log to File / Add
+Integration Message; ProcessingError member functions; Debug Orchestrations; Concept: Orchestration
+Builder Logs; Concept: Orchestration Activity; Enable/Check/Modify/Disable Verbose Logging for
+Orchestrations; Generate Orchestration Summary Reports; Reference: Orchestration Summary Report
+Details; Concept: Orchestration Processes), retrieved 2026-10-02. Counts from Workday sample
+orchestrations are labelled as such.
+
+## 1. Error handlers
+
+Local error handler: related actions on a step or a group > Add Error Handler. It opens its own
+canvas. It starts with the same data the step started with — not the failed step's outputs — plus
+`processingError` (type ProcessingError).
+Modes:
+- Propagate Error: runs the handler's steps, then rethrows to the parent handler or, if none, the
+  global handler.
+- Conditional Outputs: runs the handler's steps and outputs boolean `isSuccess`. If the protected
+  step(s) succeeded, `isSuccess` = true and their outputs are available; if not, only `isSuccess`
+  is available. Downstream steps must read the protected outputs only under an `isSuccess`
+  condition (Branch on Conditions) — reading them after a failure rethrows the error. Can't be
+  used on the last step of an orchestration or of a group. Outputs of the handler's last step
+  aren't propagated.
+Global error handler: lightning-bolt button at the top of Orchestration Builder; catches anything
+not handled locally or propagated.
+Export strategy values: PropagateError, ConditionalOutputs, GlobalErrorHandler (Workday samples:
+58, 24 and 34 occurrences). Error handlers attached to a loop surface in samples as
+`data._group_<LoopName>.processingError`.
+
+ProcessingError functions: locationId() (failing step ID), locationPath() (qualified ID),
+message() (error type + message + location), rawMessage() (message only), toString().
+message() and rawMessage() are for logging only — Workday: "Don't rely on its contents for logical
+control."
+Typical log expression:
+    s"${"Step failed: "}${data.MyHandler.processingError.locationPath()}${" - "}${data.MyHandler.processingError.message()}"
+
+## 2. When does something count as a failure?
+
+- An unsuccessful HTTP response does not fail the orchestration unless the step uses a custom HTTP
+  retry policy with a defined success range. Alternatively test
+  `data.Step.responseStatusCode.is2xxStatusCode()` and `response.isSoapFault()` and stop with
+  Continue on Conditions.
+- Non-default accessors (stringAtJsonPath, numberAtJsonPath, stringAtXPath, ...) and
+  attrstore.*Value throw when the value is missing → the step fails.
+- Continue on Conditions: false assertion stops the orchestration and logs its message.
+- Validate: never stops the run; check `allValid` / `anyError` and decide.
+- HTTP polling: if the polling duration elapses without the stop conditions, the run continues
+  with the last response unless Error On Timeout is selected (then an error handler can react).
+- Trigger Integration: retries cover only the trigger; a failed child integration must be handled
+  from its returned status / an error handler.
+- Join Loop strategies "Complete with Error" (multiple/missing matches) stop processing.
+- Validate the whole orchestration with the toolbar Validate button; Save to App Hub also
+  validates and writes a build log.
+
+## 3. Logging options
+
+| Component | Templates | Where it shows |
+| Log | all | Run Logs on the Developer Site (wd_category console) |
+| Add Integration Message | IS only | the integration event's Messages tab in the tenant; Severity INFO (default), CRITICAL, DEBUG, ERROR, WARNING; Summary + Detail + Condition |
+| Log to File | IS only | CSV document attached to the integration event; named logs are auto-attached if a step fails outside an error handler |
+All three accept a Condition — use it for debug-only logging driven by a launch parameter or an
+app attribute (Workday samples use lp.booleanParam("...debug...") style flags).
+Never log personal data or secrets; logs are visible to people with access to the app or the
+integration event.
+
+## 4. Step debugger (Orchestration Builder)
+
+Select a step > Debug Step > Select Tenant > Connect to Tenant > provide Required Inputs (Name,
+Data type, Value) if the previous step hasn't run > Debug Current Step > inspect Debug Outputs >
+Next Step. Works for orchestrations, suborchestrations and error handlers.
+Not available for Trigger Business Process, Trigger Integration, Trigger PDF Generation, or Send
+HTTP Request with polling.
+Deploy and run the app at least once before debugging when the orchestration uses the Integration
+System template, or contains a suborchestration that uses lp or intsys functions or Trigger PDF
+Generation, Store Document, Log to File or Add Integration Message; then pick a recent run so the
+launch parameters, tokens and documents are imported.
+Temporarily exclude a step: related actions > Disable (re-enable with Enable).
+
+## 5. Logs on the Developer Site
+
+Build Logs (footer of Orchestration Builder): written on Save to App Hub; compilation errors and
+performance warnings.
+Run Logs (footer): runtime information, two views: Run Logs and API Logs; Edit Fields chooses
+columns; Auto-Refresh every 30 s.
+Useful fields: wd_orch_name, wd_orch_id, wd_orch_step_name, wd_message, wd_level (ERROR, WARN,
+INFO, DEBUG), wd_category (console = Log component messages), wd_log_type (access, app, audit,
+remote), wd_common_request_id, wd_path, wd_http_method, wd_response_code, wd_response_time,
+wd_request_bytes, wd_response_bytes, wd_api_type, wd_api_version, wd_service (api-gateway,
+orchestrate), wd_tenant, wd_tenant_alias, wd_env (IMPL, SANDBOX, PROD, WCPDEV), wd_app_id,
+wd_app_promotion_status (RELEASE_CANDIDATE, RELEASED, SANDBOX_RELEASE), wd_username.
+The Analytics dashboard > Logs tab holds application logs and opens pre-filtered from
+Orchestration Activity ("View Logs").
+
+## 6. Orchestration Activity (app home page)
+
+Lists orchestrations that have run on a tenant: Latest Run, Summary of Runs (green completed,
+yellow completed with errors, red failed/timed out/cancelled, blue running or awaiting callback),
+tenant. Filters: date range (started/ended), tenant, failed only.
+Per orchestration: Run ID (expand for Common Request ID and Process IDs), Current Status, Start
+Time (expand for Elapsed Time and Compute Time), Tenant. Filters by status, Common Request ID,
+Instance ID.
+Statuses: RUNNING, AWAITING_CALLBACK, SUCCESS, CANCELLED, KILLED, COMPLETED_WITH_ERROR, QUEUED,
+TIMED_OUT, FAILED.
+Cancel = graceful stop at the next safe cancellation checkpoint (status Cancelled). Kill =
+immediate stop regardless of consistency (confirmation phrase required; status Killed) — for
+stuck runs such as infinite loops.
+
+## 7. Verbose logging (REST API)
+
+Roles: Developer, Collaborator or Developer Support.
+Enable: PUT https://api.us.wcp.workday.com/orchestrate/v1/apps/{appID}/orchestrations/{orchName}/debug/logging
+(EMEA: api.eu.wcp.workday.com) with header Authorization: Bearer <developer-site token> and body
+{"tenantAlias": "...", "oneTimeOnly": true|false, "duration": "30m" (default; 0s to 14d),
+"stepFilter": "*" or specific steps}. The response echoes the settings plus disposed and expiry.
+Separate documented requests check, modify and disable verbose logging.
+The bearer token is a 1-hour Developer Site session token (Workday's page describes copying the
+wday-access-token cookie from the browser). It is a secret: never paste it into chats, tickets or
+files, and enable verbose logging only for the time needed.
+
+## 8. Orchestration Summary Report
+
+App > Orchestration Activity > select orchestrations (or runs of one orchestration) with filters >
+Generate Summary Report > name it (e.g. TimedOutRuns_OnboardingApp_July2025) > download JSON.
+Contains per-step successCount, failureCount, avg/max/min/last/total duration, stdDev, position,
+per-process statistics, and aggregate run statistics (totalRuns, runsWithState, average/longest/
+shortest run duration). Large scopes can fail — reduce the number of runs.
+
+## 9. Symptom → likely cause
+
+| Symptom | Check |
+| Run "succeeds" but the target system didn't change | HTTP error not treated as failure: add a retry policy with success range or test responseStatusCode |
+| TIMED_OUT | process > 60/45 min without checkpoint; Sync > 5 min (25 s from a page); polling/long-running waits; forced sequential loops |
+| AWAITING_CALLBACK for long | Trigger Integration child or Trigger Business Process not finished; BP must complete within 90 days |
+| "value not found" exceptions | non-default accessor or attrstore value missing; JSONPath/XPath mismatch |
+| Integration launches but nothing happens | wrong Orchestration Name / Application Reference ID in Configure Integration Attributes; app not installed on that tenant |
+| No output file on the integration event | Store Document without Attach document to integration event = boolean true |
+| Launch parameter not found | lp.* label differs from the integration system's launch parameter name |
+| 403 from Workday API | missing domain permission (View/Modify, Get/Put) for the credential used (ISU or initiating user) |
+| HTTP 500 on business objects in Sandbox Preview | refresh tokens missing in Sandbox Preview credential store |
+| Memory errors / slow runs | toString() on large documents, nested loops instead of Join Loop, data > 200 MB in memory |
+| BP status-change orchestration not launching | missing Orchestration Launch Configuration, User to Perform Orchestration Launches, condition rule false; scheduler delay up to ~15 min |

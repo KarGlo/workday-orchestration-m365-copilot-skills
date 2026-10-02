@@ -1,0 +1,635 @@
+# Orchestrate Expression Language: member functions for documents and structured data
+
+Source: Workday Developer documentation, Integration Apps > Orchestrate Expression Language (retrieved 2026-10-02).
+Format of each entry: name(argument: Type, ...) -> ReturnType, followed by the documented behaviour.
+Global functions are called with their qualifier, for example lp.stringParam("Name"); functions without a qualifier are called by name.
+Member functions are appended to a value of the given type, for example data.Step.response.stringAtJsonPath("$.id").
+
+## Data (member functions)
+
+- asCSV() -> Csv
+  Treats the document as CSV (of CsvTypeAny).
+- asCSV(schemaReference: String) -> Csv
+  Treats the document as CSV (of CsvTypeAny) and applies the specified CSV format.
+- asJSON() -> Json
+  Treats the document as JSON (of JsonTypeAny).
+- asTEXT() -> Text
+  Treats the document as TEXT (of TextType).
+- asXML() -> Xml
+  Treats the document as XML (of XmlTypeAny).
+- base64decode(contentType: String) -> Data
+  Returns a Base64-encoded document in decoded form and sets its content type as specified.
+- base64encode() -> Data
+  Returns a document encoded in Base64 format.
+- base64MimeDecode(contentType (String) -> Data
+  Returns a Base64 MIME-encoded document in decoded form.
+- base64MimeEncode() -> Data
+  Returns a document encoded in Base64 MIME form.
+- charset() -> String
+  Returns the Content-Type header's charset parameter. Returns UTF-8 if charset isn't specified in the Content-Type.
+- contentLength() -> Number
+  Returns the size of the document.
+- contentType() -> String
+  Returns the content type of a document.
+- convertCharsetEncoding() -> Data
+  Returns data converted to the specified character set. If the specified character set isn't UTF-8 with BOM set to false, the data will be of limited utility, transmittable but not processable.
+- createHmacSHA1(key: String) -> Data
+  Returns a SHA-1 HMAC for the provided data as a Data object, using the specified key. You should use this cryptographically weak hash only for legacy interoperability, and use the createHmacSHA256 or createHmacSHA512 functions for new integrations.
+- createHmacSHA256(key: String) -> Data
+  Returns a SHA-256 HMAC for the provided data as a Data object, using the specified key. You can use the hash with the base64encode, base64MimeEncode, or toHex functions.
+- createHmacSHA512(key: String) -> Data
+  Returns a SHA-512 HMAC for the provided data as a Data object, using the specified key. You can use the hash with the base64encode, base64MimeEncode, or toHex functions.
+- createMD5() -> Data
+  Returns an MD-5 hash for the provided data as a Data object. You can use the hash with the base64encode or base64MimeEncode functions for Base64 encoding, or with the toHex function for hexadecimal encoding.
+- createSHA1() -> Data
+  Returns an SHA-1 hash for the provided data as a Data object. You can use the hash with the base64encode or base64MimeEncode functions for Base64 encoding, or with the toHex function for hexadecimal encoding.
+- createSHA256() -> Data
+  Returns an SHA-256 hash for the provided data as a Data object. You can use the hash with the base64encode or base64MimeEncode functions for Base64 encoding, or with the toHex function for hexadecimal encoding.
+- createSHA512() -> Data
+  Returns an SHA-512 hash for the provided data as a Data object. You can use the hash with the base64encode or base64MimeEncode functions for Base64 encoding, or with the toHex function for hexadecimal encoding.
+- dispositionParam(Name: String) -> String
+  Returns the value of the additional disposition parameter. Throws an exception if no parameter with the specified name exists.
+- dispositionParamNames() -> StringList
+  Returns a list of additional disposition parameters for the Data type.
+- dispositionParamWithDefault(Name: String, default: Data) -> String
+  Returns the value of the additional disposition parameter, or the default value if no parameter with the specified name exists.
+- fetchFileFromZipArchive(filePath: String) -> Data
+  Returns the file at the specified file path in a Zip archive.
+- fromHex() -> Data
+  Returns a hexadecimal string as binary data.
+- gunzip(contentType: String) -> Data
+  Returns decompressed gzipped data, automatically re-encoding it to UTF-8 if the original charset was different. Use the contentType parameter to specify the content type of the data as it was encoded before gzipping. The returned Data type is determined by the contentType. Examples: application/json returns JSON, text/xml returns XML.
+- gzip() -> Data
+  Returns compressed gzipped Data type output.
+- hasDispositionParam(Name: String) -> Boolean
+  Returns true if the specified parameter exists.
+- isFileInZipArchive(filePath: String) -> Boolean
+  Returns true if the specified file path is present in the Zip archive.
+- isSoapFault() -> Boolean
+  Returns true if the document is XML and contains a SOAP 1.1/1.2 Fault.
+- listFilesInZipArchive() -> StringList
+  Returns a list of the paths of all the files present in the archive.
+- overrideCharset() -> Data
+  Returns data unconverted but with the charset parameter overridden as specified. If the specified character set isn't UTF-8 with BOM set to false, the data will be of limited utility, transmittable but not processable.
+- pgpDecrypt(privateKey: PgpCredential, requiredMdc: Boolean) -> Data
+  Returns decrypted OpenPGP-encrypted data using the private key referenced by the specified PGP credential reference. When the requireMdc argument is set to true, messages lacking MDC integrity protection are rejected. Set it to false only when decrypting legacy messages encrypted without MDC.
+- pgpDecryptAndVerify(privateKey: PgpCredential, signerPublicKey: PgpCredential, requireMdc: Boolean) -> Data
+  Returns decrypted OpenPGP-encrypted data using the private key referenced by the specified PGP credential reference, and verifies the signature against the specified public key. When the requireMdc argument is set to true, messages lacking MDC integrity protection are rejected. Set it to false only when decrypting legacy messages encrypted without MDC.
+- pgpEncrypt(publicKey: PgpCredential, fileName: String) -> Data
+  Returns the data in a file with the specified file name, encrypted using OpenPGP for the recipient whose public key is referenced by the specified PGP credential reference. The output is ASCII-armored.
+- pgpEncrypt(publicKey: PgpCredential, armored: Boolean, fileName: String) -> Data
+  Returns the data in a file with the specified file name, encrypted using OpenPGP for the recipient whose public key is referenced by the specified PGP credential reference. When the armored argument is set to true, the output is ASCII-armored; otherwise the output is raw binary.
+- pgpSignAndEncrypt(publicKey: PgpCredential, signingKey: PgpCredential, fileName: String) -> Data
+  Returns the data in a file with the specified filename, signed using the private key referenced by the specified signing PGP credential reference. The data is encrypted using OpenPGP for the recipient whose public key is referenced by the specified public key PGP credential reference. The output is ASCII-armored.
+- pgpSignAndEncrypt(publicKey: PgpCredential, signingKey: PgpCredential, armored: Boolean, fileName: String) -> Data
+  Returns the data in a file with the specified filename, signed using the private key referenced by the specified signing PGP credential reference. The data is encrypted using OpenPGP for the recipient whose public key is referenced by the specified public key PGP credential reference. When the armored argument is set to true, the output is ASCII-armored; otherwise the output is raw binary.
+- toHex() -> Text
+  Returns binary data as a hexidecimal string.
+- toString() -> String
+  Returns a string representation of a document if its content is a textual type. Examples: Json, CSV. Otherwise returns a brief description of the document and content-type.
+- unzip() -> DataIterator
+  Returns an iterator of all the files present in the archive as Data types.
+
+## Json (member functions)
+
+- addBooleanValue(name: String, value: Boolean) -> Json
+  Returns a new JSON document with an additional field of the specified name containing a corresponding Boolean of the specified value. If the input isn't a JSON Array or a JSON Object, the new field and value aren't added and the document is returned as is.
+- addJsonValue(name: String, value: Json) -> Json
+  Returns a new JSON document with an additional field of the specified name containing corresponding JSON of the specified value. If the input isn't a JSON Array or a JSON Object, the new field and value aren't added and the document is returned as is.
+- addNumberValue(name: String, value: Number) -> Json
+  Returns a new JSON document with an additional field of the specified name containing a corresponding number of the specified value. If the input isn't a JSON Array or a JSON Object, the new field and value aren't added and the document is returned as is.
+- addStringValue(name: String, value: String) -> Json
+  Returns a new JSON document with an additional field of the specified name containing a corresponding string of the specified value. If the input isn't a JSON Array or a JSON Object, the new field and value aren't added and the document is returned as is.
+- arrayAtJsonPath(path: String) -> Json
+  Returns the JSON array at the specified JsonPath, if one exists, in a new JSON document. Throws an exception if there's a value at the path, but it isn't an array.
+- arrayAtJsonPathWithDefault(path: String, defaultValue: Json) -> Json
+  Returns the JSON array at the specified JSON path, if one exists, in a new JSON document. Otherwise assigns the specified default JSON document. Throws an exception if there's a value at the path, but it isn't an array.
+- assertValid() -> Json
+  Returns the JSON document itself if it is valid. Otherwise, throws an exception.
+- bigDecimalAtJsonPath(path: String) -> BigDecimal
+  Returns the value at the specified JSON path as a BigDecimal type if the value exists and is a JSON number or a number in a JSON string. Otherwise, throws an exception.
+- booleanAtJsonPath(path: String) -> Boolean
+  Returns the value at the specified JsonPath if the value exists and is a boolean. Otherwise throws an exception.
+- booleanAtJsonPathWithDefault(path: String, defaultValue: Boolean) -> Boolean
+  Returns the boolean value at the specified JsonPath if the value exists or the specified default if it doesn't. Throws an exception if there's a value at the path but it isn't a boolean.
+- booleansAtJsonPath(path: String) -> Boolean
+  Returns all the boolean values at a specified JsonPath, provided all the matching values are booleans.
+- convertToXml() -> Xml
+  Converts a JSON document to an XML document. XML namespaces and attributes aren't currently supported. Every JSON field is converted to an XML tag.
+- convertToXml1(rootName: string) -> Xml
+  Converts a JSON document to an XML document with the specified root name. XML namespaces and attributes aren't currently supported. Every JSON field is converted to an XML tag.
+- convertToXml2(rootName: string, floatingArrayName: string) -> Xml
+  Converts a JSON document to an XML document with the specified root name and the specifed floating array name. XML namespaces and attributes aren't currently supported. Every JSON field is converted to an XML tag.
+- convertToXml3(rootName: string, floatingArrayName: string, floatingObjectName: string) -> Xml
+  Converts a JSON document to an XML document with the specified root name, the specifed floating array name, and the specified floating object name. XML namespaces and attributes aren't currently supported. Every JSON field is converted to an XML tag.
+- countItemsAtJsonPath(path: String) -> Number
+  Returns a count of the number of items that match the specified JsonPath.
+- distinct(path: StringType, keyPath: StringType) -> Json
+  Returns a collection of distinct JSON values as a JSON array. The collection is selected by the specified path. Uniqueness is tested by selecting a value within each item of the collection using the specified key path.
+- flatten() -> Json
+  Returns JSON array flattened by 1 level.
+- includeCharactersUsingList(inclusionList: StringListType, defaultReplacement: StringType) -> Json
+  Returns a JSON file, replacing any characters not present in the inclusion list with the specified replacement. Characters that are on the inclusion list are returned unchanged. JSON control characters are returned unchanged.
+- indices(path: String) -> NumberList
+  Returns all the array indices that match a specified path if the match is an array element.
+- isNullAtJsonPath(path: String) -> Boolean
+  Returns true if a Json null exists at the specified JsonPath. Returns false if there's a non-null value at the path or if the path doesn't match anything.
+- isValid() -> Boolean
+  Returns true if the JSON document is valid.
+- isValueAtJsonPath(path: String) -> Boolean
+  Returns true if a value exists at the specified JsonPath.
+- iterator(path: String) -> JsonIterator
+  Returns an iterator of JSON values matching the specified JsonPath as JsonType instances.
+- iterator(path: String, batchSize: Number) -> JsonIterator
+  Returns an iterator of JSON values matching the specified JsonPath as JsonType instances, batched into JSON arrays of the specified size.
+- jsonDataAtJsonPath(path: String) -> Json
+  Returns the value at the specified JsonPath in a new JsonType document. No type checking is done on the value extracted.
+- jsonKeyValueIterator(path: String) -> JsonKeyValueIterator
+  Returns an iterator of the JSON document's key-value pairs, starting at the specified path. Throws an exception if the given path doesn't point to a JSON object.
+- jsonKeyValueIterator() -> JsonKeyValueIterator
+  Returns an iterator of the JSON document's key-value pairs, starting at the root.
+- numberAtJsonPath(path: String) -> Number
+  Returns the value at the specified JsonPath if the value exists and is a number. Throws an exception if no value exists or a value exists but isn't a number.
+- numberAtJsonPathWithDefault(path: String, defaultValue: Number) -> Number
+  Returns the value at the specified JsonPath if the value exists and is a number. Otherwise returns the specified default. Throws an exception if a value exists but isn't a number.
+- numbersAtJsonPath(path: String) -> NumberList
+  Returns all the number values in the array at a specified JsonPath.
+- objectAtJsonPath(path: String) -> Json
+  Returns a Json document containing the Json object at the specified JsonPath.
+- objectAtJsonPathWithDefault(path: String, defaultValue: Json) -> Json
+  Returns a Json document containing the Json object at the specified JsonPath. If no object exists, returns the specified default JsonType document. Throws an exception if a value exists at the path but it isn't an object.
+- properties(path: String) -> StringList
+  Returns as strings all the property names and array indices that match the specified path. Returns an empty list if the path doesn't match anything.
+- propertyNames(path: String) -> StringList
+  Returns all the property names that match the specified path if the match isn't an item in an array.
+- replaceAndIncludeCharacters(mapping: StringMapType, defaultReplacement: StringType) -> Json
+  Returns a JSON file with characters replaced according to the provided mapping. If a character is missing from the provided document, the default string is returned in its place. JSON control characters are returned unchanged.
+- replaceCharactersUsingMapping(mapping: StringMapType) -> (return type not stated in the docs)
+  Return types: Json Returns a JSON file with characters replaced according to the provided mapping. If a character isn't mapped, it's returned unchanged.
+- remove(path: String) -> Json
+  Returns a JSON document with the properties at the specified path removed.
+- stringAtJsonPath(path: String) -> String
+  Returns the value at the specified JsonPath if the value exists and is a string. Throws an exception if no value exists or a value exists but isn't a string.
+- stringAtJsonPathOrEmptyString(path: String) -> String
+  Returns the value at the specified JSON path if the path points to a string value. Otherwise returns an empty string. Provides a safe way to extract values without throwing exceptions when the path doesn't exist.
+- stringAtJsonPathWithDefault(path: String, defaultValue: String) -> String
+  Returns the value at the specified JsonPath if the value exists and is a string. Otherwise returns the specified default. Throws an exception if a value exists but isn't a string.
+- stringsAtJsonPath(path: String) -> StringList
+  Returns all the strings values at the specified JsonPath.
+- textDataAtJsonPath(path: String) -> Text
+  Returns the value at the specified JsonPath in a new TextType document. No type checking is done on the value extracted.
+- toXwwwFormUrlEncoded() -> Text
+  Returns a Json object converted into an x-www-form-url-encoded string housed in a text instance. Ignores nonprimitive values in the root object.
+- valuesAtJsonPathAsArray(path: String) -> Json
+  Returns an array of all the values that match the specified path. Returns an empty array if no values are matched. Use this function to filter the values in an array. Example: return an array of primitive values only.
+
+## JsonKeyValue (member functions)
+
+- arrayValue() -> Json
+  Returns the value if it's a JSON type, otherwise throws an exception.
+- booleanValue() -> Boolean
+  Returns the value if it's a Boolean type, otherwise throws an exception.
+- isArrayValue() -> Boolean
+  Returns true if the value is a JSON type, otherwise returns false.
+- isBooleanValue() -> Boolean
+  Returns true if the value is a Boolean type, otherwise returns false.
+- isNullValue() -> Boolean
+  Returns true if the value is null, otherwise returns false.
+- isNumberValue() -> Boolean
+  Returns true if the value is a Number type, otherwise returns false.
+- isObjectValue() -> Boolean
+  Returns true if the value is a JSON type, otherwise returns false.
+- isStringValue() -> Boolean
+  Returns true if the value is a String type, otherwise returns false.
+- key() -> String
+  Returns the field as a String type.
+- numberValue() -> Number
+  Returns the value if it's a Number type, otherwise throws an exception.
+- objectValue() -> Json
+  Returns the value if it's a JSON type, otherwise throws an exception.
+- stringValue() -> String
+  Returns the value if it's a String type, otherwise throws an exception.
+- value() -> Any
+  Returns the value if it's present, otherwise throws an exception.
+
+## Xml (member functions)
+
+- assertValue() -> Xml
+  Returns the XML document itself if it is valid. Otherwise, throws an exception.
+- beautifyXML(indentSpaces: Number) -> BigDecimal
+  Returns a new XML document with the XML content formatted for human readability using the specified number of indentSpaces.
+- bigDecimalAtXPath(xpath: String) -> BigDecimal
+  Returns the value at the specified XPath as a BigDecimal if the XPath points to a text node and the value is numeric. Otherwise, throws an exception.
+- bigDecimalAtXPathWithDefault(xpath: String, defaultValue: BigDecimal) -> BigDecimal
+  Returns the value at the specified XPath as a BigDecimal if the XPath points to a text node and the value is numeric. Returns the supplied default if no value exists at the specified XPath. Throws an exception if the value at the XPath isn't numeric.
+- bigDecimalsAtXPath(xpath: String) -> BigDecimal
+  Returns all text node values that match the specified XPath provided all the values matched are numeric. Otherwise, throws an exception.
+- booleanAtXPath(xpath: String) -> Boolean
+  Returns the boolean leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't a boolean.
+- booleanAtXPathWithDefault(xpath: String, defaultValue: Boolean) -> Boolean
+  Returns the boolean leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't a boolean.
+- booleansAtXPath(xpath: String) -> Boolean
+  Returns all boolean leaf node values that match the specified XPath. Throws an exception if not all the values matched are boolean.
+- canonicalize(withComments) -> Xml
+  Returns a new XML in the inclusive canonical form, according to the Canonical XML Version 1.0 specification. Includes comments from the original if withComments is set to true.
+- convertToJson() -> (return type not stated in the docs)
+  Converts an XML document to a JSON document using a default conversion process. Attributes are included.
+- convertToJson(ignoreAttributes: Boolean, tryConvertTypes: Boolean) -> Json
+  Converts an XML document to a JSON document using a default conversion process. If tryConvertTypes is set to false every JSON field will be a string.
+- convertToJsonNullEmptyTags(ignoreAttributes: Boolean, tryConvertTypes: Boolean) -> Json
+  Returns a JSON document with empty tags from the XML original given a null value. If tryConvertTypes is set to false every JSON field will be a string.
+- convertToJsonRemoveEmptyTags(ignoreAttributes: Boolean, tryConvertTypes: Boolean) -> Json
+  Returns a JSON document with empty tags from the XML original removed. If tryConvertTypes is set to false every JSON field will be a string.
+- countItemsAtXPath(xpath: String) -> Number
+  Returns a count of the number of items that match the specified XPath.
+- dateAtXPath(xpath: String) -> Date
+  Returns the Local Date leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't a valid ISO Local Date.
+- dateAtXPathWithDefault(xpath: String, defaultValue: Date) -> Date
+  Returns the Local Date leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't a valid ISO Local Date.
+- dateTimeAtXPath(xpath: String) -> LocalDateTime
+  Returns the Local Date Time leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't a valid ISO Local Date Time.
+- dateTimeAtXPathWithDefault(xpath: String, defaultValue: LocalDateTime) -> LocalDateTime
+  Returns the Local Date Time leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't a valid ISO Local Date Time.
+- distinct(xpath: String, keyXPath: String, header: String, footer: String, separator: String, includeXmlDeclaration: Boolean) -> Xml
+  Returns an XML document containing a collection of aggregated XML fragments selected by the specified XPath. Uniqueness is tested by selecting a value within each XML fragment of the collection using the specified key XPath.
+- excludeAllNamespaces() -> Xml
+  Returns an XML document with all namespaces excluded but with the structure otherwise intact.
+- exists(xpath: String) -> Xml
+  Returns true if the specified XPath returns a nonempty sequence.
+- filterWhereElementAbsent(xpath: String, elementXPath: String) -> Xml
+  Returns an XML document containing XML fragments selected by the specified xpath, aggregating only fragments where the specified elementXPath is absent. Acts as a workaround for XPath predicates like not(element) or count(element)=0.
+- filterWhereElementAbsent(xpath: String, elementXPath: String, separator: String, includeXmlDeclaration: Boolean) -> Xml
+  Returns an XML document containing XML fragments selected by the specified xpath, aggregating only fragments where the specified elementXPath is absent, using the specified separator. Includes the XML declaration when the boolean value is set to true. Acts as a workaround for XPath predicates like not(element) or count(element)=0.
+- fragmentAtXpath() -> Xml
+  Returns the first fragment of XML matching the given XPath. Throws an exception if the XPath doesn't match anything.
+- includeCharactersUsingList(inclusionList: StringListType, defaultReplacement: StringType) -> Xml
+  Returns an XML file, replacing any characters not present in the inclusion list with the specified replacement. Characters that are on the inclusion list are returned unchanged. XML control characters are returned unchanged.
+- isDateAtXPath(xpath: String) -> Boolean
+  Returns true if the value at the specified XPath is a valid ISO Local Date.
+- isDateTimeAtXPath(xpath: String) -> Boolean
+  Returns true if the value at the specified XPath is a valid ISO Local Date Time.
+- isValid() -> Boolean
+  Returns true if the XML document is valid.
+- isValueAtXPath(xpath: String) -> Boolean
+  Returns true if a value exists at the specified XPath - that is, returns true if stringAtXPath() for the specified XPath would return a value.
+- isWorkdayInvalidReference() -> Boolean
+  Returns true if the fragment is a Workday SOAP API invalid reference response.
+- isZonedDateTimeAtXPath(xpath: String) -> Boolean
+  Returns true if the value at the specified XPath is a valid ISO Offset Date Time or ISO Instant.
+- iterator(xpath: String) -> XmlDataIterator
+  Returns an iterator of XML values matching the specified XPath as XmlType instances.
+- iterator(xpath: String, batchSize: Number, header: String, footer: String) -> Boolean
+  Returns an iterator of XML values matching the specified XPath as XmlType instances, batched into an XML document with the specified number of records. Also returns a root element defined by the specified header and footer.
+- localNameAtXpath(xpath: String) -> String
+  Returns the local part of the element name in the supplied XPath. If the selected XPath doesn't point to a leaf node, returns the local name of the first matching node. If there are no matches, returns an empty string is returned
+- numberAtXPath(xpath: String) -> Number
+  Returns the numeric leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't numeric.
+- numberAtXPathWithDefault(xpath: String, defaultValue: Number) -> Number
+  Returns the numeric leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't numeric.
+- numbersAtXPath(xpath: String) -> NumberList
+  Returns all numeric leaf node values that match the specified XPath. Throws an exception if not all the values matched are numeric.
+- removeAttributes(xpath: StringType) -> Xml
+  Returns a new XML document with all attributes matching the supplied XPath removed.
+- removeDtdDeclaration() -> XML
+  Returns a new XML document with DTD declaration removed.
+- removeFragments(xpath: StringType) -> Xml
+  Returns a new XML document with all fragments matching the specified XPath removed.
+- removeWhitespace() -> Xml
+  Returns a new XML document with all white space removed.
+- removeXmlDeclaration() -> XML
+  Returns a new XML document with XML declaration removed.
+- replaceAllNamespaces(newNamespace: String, newPrefix: String) -> XML
+  Returns a new XML document with all namespaces replaced by the specified namespace and prefix.
+- replaceAndIncludeCharacters(mapping: StringMapType, defaultReplacement: StringType) -> Xml
+  Returns an XML file with characters replaced according to the provided mapping. If a character is missing from the provided document, the default string is returned in its place. XML control characters are returned unchanged.
+- replaceAttributes(xpath: StringType, replacementLocalPart: StringType, replacementValue: StringType) -> Xml
+  Returns a new XML document with all attributes matching the specified XPath replaced by the specified attribute and attribute value. The default namespace applies.
+- replaceAttributes(xpath: StringType, replacementLocalPart: StringType, replacementNamespacePrefix: StringType, replacementValue: StringType) -> Xml
+  Returns a new XML document with all attributes matching the specified XPath replaced by the specified attribute and attribute value. The namespace associated with the specified prefix applies.
+- replaceCharactersUsingMapping(mapping: StringMapType) -> (return type not stated in the docs)
+  Return types: Xml Returns an XML file with characters replaced according to the provided mapping. If a character isn't mapped, it's returned unchanged.
+- replaceFragments(xpath: StringType, replacement: XmlType) -> Xml
+  Returns a new XML document with all fragments matching the specified XPath replaced by the specified XML fragment.
+- replaceNamespace(oldNamespace: String, newNamespace: String) -> XML
+  Returns a new XML document with all instances of the specified oldNamespace replaced by the specified newNamespace.
+- replaceNamespacePrefix(oldPrefix: String, newPrefix: String) -> XML
+  Returns a new XML document with all instances of the specified oldPrefix replaced by the specified newPrefix.
+- soapFaultCode() -> String
+  Returns the SOAP 1.1/1.2 fault code if one is present. Otherwise throws an exception.
+- stringAtXPath(xpath: String) -> String
+  Returns the string leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't a string.
+- stringAtXPathOrEmptyString(xpath: String) -> String
+  Returns the value at the specified XPath if the XPath points to a text node or an attribute. Otherwise returns an empty string. Provides a safe way to extract values without throwing exceptions when the path doesn't exist.
+- stringAtXPathWithDefault(xpath: String, defaultValue: String) -> String
+  Returns the string leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't a string.
+- stringsAtXPath(xpath: String) -> StringList
+  Returns all leaf node values that match the given XPath. Throws an exception if not all the values at the path are strings.
+- unwrapSoap() -> StringList
+  Unwraps an XML document from a SOAP envelope if one is present. Supports SOAP 1.1 and SOAP 1.2.
+- wrapSoapV11() -> StringList
+  Wraps the provided XML document in a SOAP 1.1 envelope.
+- wrapSoapV12() -> StringList
+  Wraps the provided XML document in a SOAP 1.2 envelope.
+- xmlString(xpath: String) -> String
+  Returns the value at the given XPath if the XPath points to a text node or an attribute, else throws an exception. The string is escaped for inclusion in XML.
+- xmlStringWithDefault(xpath: String, defaultValue: String) -> String
+  Returns the value at the specified XPath if the XPath points to a text node or an attribute. Otherwise, returns the specified default. The extracted string is escaped for inclusion in XML. The default value is used as supplied.
+- xmlStrings(xpath: String) -> StringList
+  Returns all text node or attribute values that match the specified XPath. The strings are escaped for inclusion in XML.
+- zonedDateTimeAtXPath(xpath: String) -> ZonedDateTime
+  Returns the ISO Offset Date Time or ISO Instant leaf node value at the specified XPath. Throws an exception if the XPath doesn't point to a leaf node value or the value isn't a valid ISO Offset Date Time or ISO Instant.
+- zonedDateTimeAtXPathWithDefault(xpath: String, defaultValue: ZonedDateTime) -> ZonedDateTime
+  Returns the ISO Offset Date Time or ISO Instant leaf node value at the specified XPath or the specified default if no leaf node value exists. Throws an exception if a value exists at the path but isn't a valid ISO Offset Date Time or ISO Instant.
+- Type() -> (return type not stated in the docs)
+  Returns the value at the given XPath if the XPath points to a text node or an attribute, else returns an empty string. This provides a safe way to extract values without throwing exceptions when the path doesn't exist, making it useful for optional data extraction from XML documents.
+
+## Csv (member functions)
+
+- convert(columnIndices: NumberList) -> Csv
+  Returns a new CSV in which some or all column values of the provided CSV are rearranged according to the provided columnIndices parameter. The returned CSV uses the default schema. Example: If columnIndexes is List(1, 4, 2) the column values in the new CSV are the first, fourth, and second column values in the provided CSV. If a column value for one of the indices doesn't exist, an empty string is used instead.
+- convert(columnIndices: NumberList, schemaReference: CsvFormat) -> Csv
+  Returns a new CSV in which some or all column values of the provided CSV are rearranged according to the provided columnIndices parameter. The returned CSV uses the specified schema. Example: If columnIndexes is List(1, 4, 2) the column values in the new CSV are the first, fourth, and second column values in the provided CSV. If a column value for one of the indices doesn't exist, an empty string is used instead.
+- countColumns() -> Number
+  Returns a count of the columns in the CSV document header or in the first row if no header is present.
+- countRows() -> Number
+  Returns a count of the rows in the CSV document.
+- headerRow() -> CsvRow
+  Returns a CsvRowTypeAny for the header row, if one is defined.
+- includeCharactersUsingList(inclusionList: StringList, defaultReplacement: String) -> Csv
+  Returns a CSV file, replacing any characters not present in the inclusion list with the specified replacement. Characters that are on the inclusion list are returned unchanged. CSV control characters are returned unchanged.
+- iterator() -> CsvDataIterator
+  Returns an iterator, which when used in a loop returns each individual row as a CsvRowTypeAny instance.
+- replaceAndIncludeCharacters(mapping: StringMap, defaultReplacement: String) -> Csv
+  Returns a CSV file with characters replaced according to the provided mapping. If a character is missing from the provided document, the default string is returned in its place. CSV control characters are returned unchanged.
+- replaceCharactersUsingMapping(mapping: StringMap) -> (return type not stated in the docs)
+  Return types: Csv Returns a CSV file with characters replaced according to the provided mapping. If a character isn't mapped, it's returned unchanged.
+- row(n: Number) -> CsvRow
+  Returns a CsvRowTypeAny for the specified row number (zero indexed).
+- rows() -> CsvRowIterator
+  Returns an iterator of type CsvIterator, which when used in a loop returns each individual row as a CsvRowTypeAny instance. The header row, if one is defined, isn't included.
+- rows(from: Number) -> CsvRowIterator
+  Returns an iterator of type CsvIteratorType, which when used in a loop returns each individual row as a CsvRowTypeAny instance, starting from the specified row number (zero indexed). The header row, if one is defined, isn't included.
+- rows(from: Number, to: Number) -> CsvRowIterator
+  Returns an iterator of type CsvIteratorType, which when used in a loop returns each individual row as a CsvRowTypeAny instance, starting from and ending at the specified row numbers (zero indexed). The header row, if one is defined, isn't included.
+
+## CsvRow (member functions)
+
+- allColumnsAreEmpty() -> Boolean
+  Returns true if all columns in the row are empty.
+- booleanColumnValue(columnName: String) -> Boolean
+  Returns the value for the specified column if the specified column exists in the CSVSchema associated with the table row, and is a boolean. Throws an exception if the name doesn't exist or the value can't be converted to a boolean.
+- booleanColumnValueAtIndex(columnIndex: Number) -> Boolean
+  Returns the value at the specified column index if the specified index is between zero and the number of columns minus 1, and is a boolean. Throws an exception if the index isn't valid or the value can't be converted to a boolean.
+- booleanColumnValueAtIndexWithDefault(columnIndex: Number, defaultValue: Boolean) -> Boolean
+  Returns the value at the specified column index if the specified index is between zero and the number of columns minus 1, and is a boolean. Returns the specified default if no value exists at the specified index. Throws an exception if the index isn't valid or the value can't be converted to a boolean.
+- booleanColumnValueWithDefault(columnName: String, defaultValue: Boolean) -> Boolean
+  Returns the value for the specified column if the specified column exists in the CSV schema associated with the table row, and is a boolean. Returns the specified default if no value exists at the specified column. Throws an exception if the name doesn't exist or the value can't be converted to a boolean.
+- columnValue(columnName: String) -> String
+  Returns the value for the specified column if it exists in the CSV schema associated with the table row. Throws an exception if the specified column name doesn't exist.
+- columnValueAtIndex(columnIndex: Number) -> String
+  Returns the value at the specified column index if the specified index is between zero and the number of columns minus 1. Throws an exception if the specified index isn't valid.
+- fromLine(line: String, schemaReference: CsvFormat) -> Number
+  Creates a csv row value from the specified line, using the specified CSV schema.
+- numberColumnValue(columnName: String) -> Number
+  Returns the value for the specified column if the specified column exists in the CSV schema associated with the table row, and is a number. Throws an exception if the name doesn't exist or the value can't be converted to a number.
+- numberColumnValueAtIndex(columnIndex: Number) -> Number
+  Returns the value at the specified column index if the specified index is between zero and the number of columns minus 1, and is a number. Throws an exception if the name doesn't exist or the value can't be converted to a number.
+- numberColumnValueAtIndexWithDefault(columnIndex: Number, defaultValue: Number) -> Number
+  Returns the value at the specified column index if the specified index is between zero and the number of columns minus 1, and is a number. Returns the specified default if no value exists at the specified index. Throws an exception if the name doesn't exist or the value can't be converted to a number.
+- numberColumnValueWithDefault(columnName: String, defaultValue: Number) -> Number
+  Returns the value for the specified column if the specified column exists in the CSV schema associated with the table row, and is a number. Returns the specified default if no value exists at the specified column. Throws an exception if the name doesn't exist or the value can't be converted to a number.
+- toJson() -> Json
+  Returns the specified CSV row as a JSON instance document of type Json.
+- toString() -> StringList
+  Returns the specified CSV row as a String containing the row elements that conform to the given schema.
+- toString() -> String
+  Returns a string representation of the value.
+- toStringList() -> StringList
+  Returns the elements in the specified CSV row as a String List.
+
+## DocumentAccessor (member functions)
+
+- documentId(id: String) -> DocumentAccessor
+  Filters event documents for documents matching the specified document ID.
+- documentIds(ids: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the document IDs in the specified list.
+- get() -> Data
+  Returns the first document matching the applied filters.
+- get(n: Number) -> Data
+  Returns the nth document matching the applied filters.
+- getDocumentCount() -> Number
+  Returns the number of event documents.
+- getDocumentId(n: Number) -> String
+  Returns the documentId of the event document at the specified index.
+- getDocumentIds() -> StringList
+  Returns the documentIds of the event documents.
+- getFileName(n: Number) -> String
+  Returns the filename of the event document at the specified index.
+- getFileNames() -> StringList
+  Returns the filenames of the event documents.
+- getFileSize(n: Number) -> NumberList
+  Returns the file size of the event document at the specified index.
+- getFileSizes() -> NumberList
+  Returns the file sizes of the event documents.
+- getLabelWids(n: Number) -> StringList
+  Returns the label WIDs of the event document at the specified index.
+- getLabelWids() -> StringList
+  Returns the label WIDs of the event documents.
+- getLabels() -> StringList
+  Returns the labels of the event documents.
+- iterator() -> DataIterator
+  Returns an iterator of the event documents with any filters and sorting previously applied to this object.
+- labelWids(ids: StringList) -> DocumentAccessor
+  Filters event documents for documents matching all of the label IDs in the specified list.
+- labelWidsMatchAny(ids: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the label IDs in the specified list.
+- labels(labels: StringList) -> DocumentAccessor
+  Filters event documents for documents matching all of the labels in the specified list.
+- labelsMatchAny(labels: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the labels in the specified list.
+- minFileSize(size: Number) -> DocumentAccessor
+  Filters event documents for documents with a file size greater than or equal to the specified size.
+- names(names: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the filenames in the specified list.
+- sortFileNameAsc() -> DocumentAccessor
+  Sorts event documents alphabetically in ascending order.
+- sortFileNameDesc() -> DocumentAccessor
+  Sorts event documents alphabetically in descending order.
+- sortFileSizeAsc() -> DocumentAccessor
+  Sorts event documents by file size in ascending order.
+- sortFileSizeDesc() -> DocumentAccessor
+  Sorts event documents by file size in descending order.
+- toString() -> String
+  Returns a string representation of the value.
+
+## FileInfo (member functions)
+
+- filename() -> String
+  Returns the original filename.
+- filePath() -> String
+  Returns the file's full path on the remote SFTP/FTPS server.
+- toString() -> String
+  Returns a string representation of the value.
+
+## FileInfoList (member functions)
+
+- get(Index: Number) -> FileResult
+  Returns the FileResult instance at the specified 0-based index. Throws an exception if the index is out of range.
+- iterator() -> FileResultIterator
+  Returns an iterator of type FileResultIterator.
+- size() -> Number
+  Returns the size of the list.
+
+## HttpHeaders (member functions)
+
+- getHeader(name: String) -> String
+  Returns the value of the specified HTTP header. Throws an exception if the header isn't present.
+- getHeaderWithDefault(name: String, default: String) -> String
+  Returns the value of the specified HTTP header or the specified default if the header isn't present.
+- getHeaders(name: String) -> StringList
+  Returns all values of the specified HTTP header or an empty list if the header isn't present. Note: HTTP headers can occur multiple times.
+- hasHeader(name: String) -> Boolean
+  Returns true if the named HTTP header is present.
+- toString() -> String
+  Returns a string representation of the value.
+
+## HttpQueryParams (member functions)
+
+- getParam(name: String, default: String) -> String
+  Returns the value of the specified HTTP query parameter or the specified default if the parameter isn't present.
+- getParams(name: String) -> StringList
+  Returns all values of the specified HTTP query parameter or an empty list if the parameter isn't present. Note: Parameters can occur multiple times.
+- hasParam(name: String) -> Boolean
+  Returns true if the specified HTTP query parameter is present.
+- toString() -> String
+  Returns a string representation of the value.
+
+## InstanceReference (member functions)
+
+- getIDValues() -> StringList
+  Returns a StringList of constituent ID values for the instance reference. If a filter is provided, only the values matching it are returned.
+- getIDValues(idType: String) -> StringList
+  Returns a StringList of constituent ID values for the instance references with the specified idType.
+- getIDValues(idType: String, parentID: String) -> StringList
+  Returns a StringList of constituent ID values for instance references with the specified idType and parentID.
+- toString(idType: String) -> String
+  Returns the value as a String.
+- toXml(enclosingElement: String, elementName: String) -> Xml
+  Returns the instance reference as XML using the specified elementName and enclosed in the specified enclosingElement. If the elementName and enclosingElement contain a prefix, define it in the orchestration.
+
+## InstanceReferenceList (member functions)
+
+- getIDValues() -> StringList
+  Returns a StringList of constituent ID values for all instance references in the list.
+- getIDValues(idType: String) -> StringList
+  Returns a StringList of constituent ID values for any instance references in the list that match the specified idType.
+- getIDValues(idType: String, parentType) -> StringList
+  Returns a StringList of constituent ID values for any instance references in the list that match the specified idType and parentType.
+- iterator() -> InstanceReference
+  Returns an iterator that you can use to iterator over the values in the list.
+- toXML(enclosingElement: String, elementName: String) -> Xml
+  Returns the instance reference list as XML using the specified elementName and enclosed in the specified enclosingElement. If the element name and enclosing element name contain a prefix, define it in the orchestration.
+
+## Iterator (member functions)
+
+- singleCsvIterator() -> StringIterator
+  Assumes each document from the iterator is a CSV document, applies the CsvType.iterator() function to each, and returns a single iterator over the combined CSV values.
+- singleJsonIterator(path: String) -> JsonIterator
+  Assumes each document from the iterator is a JSON document, applies the JsonType.iterator(jsonPath) function to each, and returns a single iterator over the combined JSON values. This function only works if each JSON document has the same structure.
+- singleStringIterator() -> StringIterator
+  Assumes each document from the iterator is a Text document, applies the TextType.lines() function to each, and returns a single iterator over the combined string values.
+- singleXMLIterator(xpath: String) -> XmlIterator
+  Assumes each document from the iterator is an XML document, applies the XmlType.iterator(xpath) function to each, and returns a single iterator over the combined XML fragments. This function only works if each XML document has the same structure.
+- combineJsonIterators(value: JsonIterator) -> JsonIterator
+  Combines a number of JsonIteratorType instances into one, such that a loop consuming this combined iterator will iterate over all the items from each individual iterator in order.
+- combineStringIterators(value: StringIterator) -> StringIterator
+  Combines a number of StringIteratorType instances into one, such that a loop consuming this combined iterator will iterate over all the items from each individual iterator in order.
+- combineXMLIterators(value: XmlIterator) -> XmlIterator
+  Combines a number of XmlIteratorType instances into one, such that a loop consuming this combined iterator will iterate over all the items from each individual iterator in order.
+- toString() -> String
+  Returns a string representation of the value.
+
+## JoinResiduals (member functions)
+
+- booleanJoinedWith(outputName: String, key: String) -> Boolean
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type Boolean.
+- csvRowJoinedWith(outputName: String, key: String) -> CsvRow
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type CsvRow.
+- csvRowSkippedRecords() -> CsvRowIterator
+  Returns an iterator of skipped records in cases where the records are of type CsvRow.
+- dataJoinedWith(outputName: String, key: String) -> Data
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type Data.
+- dataSkippedRecords() -> DataIterator
+  Returns an iterator of skipped records in cases where the records in the Join On data set are of type Data.
+- dateJoinedWith(outputName: String, key: String) -> Date
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type Date.
+- dateTimeJoinedWith(outputName: String, key: String) -> DateTime
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type DateTime.
+- localTimeJoinedWith(outputName: String, key: String) -> LocalTime
+  Returns the unused Joined With record for the specified outputName and key in cases where the record is of type LocalTime.
+- missingMatches(joinOnRecord: Any type) -> MatchedWithIterator
+  Returns an iterator of the missing matches for the specified skipped record.
+- multipleBooleansJoinedWith(outputName: String, key: String) -> BooleanIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of type Boolean.
+- multipleCsvRowsJoinedWith(outputName: String, key: String) -> CsvRowIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of type CsvRow.
+- multipleDataJoinedWith(outputName: String, key: String) -> DataIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of type Data.
+- multipleDatesJoinedWith(outputName: String, key: String) -> DateIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of Date type.
+- multipleDateTimesJoinedWith(outputName: String, key: String) -> DateTimeIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of DateTime type.
+- multipleLocalTimesJoinedWith(outputName: String, key: String) -> LocalTimeIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of LocalTime type.
+- multipleMatches(joinOnRecord: Any) -> MatchedWithIterator
+  Returns an iterator of the multiple matches for the specified skipped record.
+- multipleNumbersJoinedWith(outputName: String, key: String) -> NumberIterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of Number type.
+- multipleStringsJoinedWith(outputName: String, key: String) -> String Iterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of String type.
+- multipleZonedDateTimesJoinedWith(outputName: String, key: String) -> ZonedDateTime Iterator
+  In the case of multiple matches, returns an iterator of the unused Joined With records for the specified outputName and key, where each value is of ZonedDateTime type.
+- noJoinOnRecords() -> Boolean
+  Returns true if the join-on iterator didn't yield any records.
+- numberJoinedWith(outputName: String, key: String) -> Number
+  Returns the unused Joined With record for the specified outputName and key, where the record is of Number type.
+- stringJoinedWith(outputName: String, key: String) -> String
+  Returns the unused Joined With record for the specified outputName and key, where the record is of String type.
+- stringSkippedRecords(outputName: String, key: String) -> String Iterator
+  In the case where the records in the Join On data set are of type String, returns an iterator of skipped records that are missing or have multiple matches.
+- summary() -> String
+  Returns a summary of skipped records and unused Join With keys for display purposes.
+- toString() -> String
+  Returns a string representation of the value.
+- unusedJoinWithKeys(outputName: String) -> StringList
+  Returns a list of unused Join With keys for the specified outputName.
+- unusedMultipleMatchJoinWithKeys(outputName: String) -> StringList
+  For the specified outputName, returns a list of keys that are unused because they occur more than once in the Join With dataset and the multiple match rule is configured to skip records.
+- zonedDateTimeJoinedWith(outputName: String, key: String) -> ZonedDateTime
+  Returns the unused Joined With record for the specified outputName and key, where the record is of ZonedDateTime type.
+
+## MatchedWith (member functions)
+
+- key() -> The key of the missing match.
+  
+- outputName() -> The outputName of the missing match.
+  
+- toString() -> Returns a string representation of the value.
+  
+
+## ProcessingError (member functions)
+
+- locationId() -> String
+  Returns the ID of the step that caused the error.
+- locationPath() -> String
+  Returns the qualified ID of the step that caused the error.
+- message() -> String
+  Returns the underlying error message, prefixed with the error type and suffixed with the qualified ID of the step that caused the error. Note: The message is made available for logging purposes only. Don't rely on its contents for logical control.
+- rawMessage() -> String
+  Returns the underlying error message. Note: The message is made available for logging purposes only. Don't rely on its contents for logical control.
+- toString() -> String
+  Returns a string representation of the value.
+
+## Note on fragmentAtXPath
+
+fragmentAtXPath is named in 'Concept: XPath Support' as one of three XPath functions that can select a document fragment (with iterator and countItemsAtXPath). Check Function Explorer for its exact signature.

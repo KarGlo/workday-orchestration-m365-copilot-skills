@@ -1,0 +1,141 @@
+# Workday Developer CLI (WDCLI)
+
+Sources: Workday Developer documentation — Concept / Get Started / Install (macOS, Windows, Linux)
+/ Set Up System User Accounts / Reference: Commands / Reference: Proxy Server Settings / Reference:
+Legacy WCP CLI Commands, for both Integration Apps and Extend Apps; Concept: Local Disk Sync;
+Edit an Integration App Directly on Local Disk; Concept: Integration App Lifecycle. Retrieved
+2026-10-02. The Integration Apps and Extend Apps command references are identical.
+
+## 1. What it does
+
+WDCLI (`wdcli`) works with both Extend apps and integration apps: upload apps to App Hub,
+download apps, deploy apps to tenants, promote apps to Implementation, Sandbox and Production,
+and authenticate programmatically with a system user (scripts, CI/CD).
+Not all commands succeed without access to the Extend SKU.
+
+## 2. Install
+
+Developer Tools download page: https://developer.workday.com/downloads
+- macOS: installer for Apple Silicon or Intel.
+- Windows: installer for ARM64 or x64.
+- Linux: x64 or ARM64 tar.gz → `tar xzvf <package>.tar.gz` → run the installer →
+  `cd wdcli/bin` → `./wdcli version`; optionally `export PATH=<location-of-package>/bin:$PATH`.
+Verify in a new terminal: `wdcli version` (must match the downloaded version). Help: `wdcli help`.
+
+## 3. Authentication
+
+Interactive (human): `wdcli auth login` — prompts and needs manual sign-in.
+Note: the install and get-started pages write `wdcli auth:login` (colon); the command reference
+writes `wdcli auth login` (space). Use whichever `wdcli help` shows for the installed version.
+Logout: `wdcli auth logout`.
+
+System user (automation):
+1. Developer Site, signed in with an Admin role: Users tab > Add a User > Company Role = System
+   User; fill the fields (if Company Email is empty Workday generates a unique, never-mailed
+   address).
+2. Save the Client ID and Client Secret (store the secret in a secret manager / CI secret store).
+3. Environment variables:
+   - macOS/Linux: export WDCLI_CLIENT_ID=<client-id>; export WDCLI_CLIENT_SECRET=<client-secret>
+   - Windows PowerShell: $env:WDCLI_CLIENT_ID="<client-id>"; $env:WDCLI_CLIENT_SECRET="<client-secret>"
+4. `wdcli auth login --system-user`
+Limitations: system users can't perform tenant-level operations such as deploying an app — that
+still needs signing in with tenant credentials; system users belong to one organization only.
+
+Tenant access: `wdcli tenant login <alias>` authenticates tenanted access for one tenant at a time
+(a new tenant token overwrites the previous one).
+
+## 4. Command reference (current WDCLI)
+
+Account
+- wdcli account list                     companies the authenticated user belongs to
+- wdcli account switch                   switch company (login defaults to the primary company)
+
+App
+- wdcli app create <appRefId>            create an app
+  e.g. wdcli app create charitableDonationsUserBuild_cqbvyp
+- wdcli app copy <appRefId> --name <newAppRefId> [--built-on-workday]
+                                         copy a local app to a new local directory with a new
+                                         reference ID
+- wdcli app upload                       upload the app to App Hub "as specified by directory"
+                                         (check `wdcli app upload --help` for the directory option)
+- wdcli app download <appRefId> [--latest-version]
+                                         download an app from App Hub to a directory
+- wdcli app info <appRefId>              app information
+- wdcli app list <companyShortId>        apps of a company, e.g. wdcli app list cqbvyp
+- wdcli app versions <appRefId>          versions of an app
+- wdcli app builds <appRefId>            builds (documented as "builds of a given app version";
+                                         the example passes an app reference ID)
+- wdcli app builds logs <buildId>        build logs, e.g. wdcli app builds logs 8d7c91f17b3ed8aea3c15a9a2a1da0db
+- wdcli app deploy <appRefId> --tenant-alias <alias> --version <version>
+                                         deploy to a tenant, e.g. wdcli app deploy myAppRefId --tenant-alias example-alias --version 02
+- wdcli app promote <appRefId> --level <level> [--built-on-workday-version <v>]
+                                         promote a version, e.g. --level implementation; promotion
+                                         follows the same rules and deadlines as the Developer Site
+                                         (including deadlines for Extend apps with model components)
+
+Auth
+- wdcli auth login [--system-user]
+- wdcli auth logout
+
+Config
+- wdcli config set <parameter> <value>   e.g. wdcli config set defaultCompanyShortId abcdef;
+                                         `--help` lists the parameters
+- wdcli config show                      current values (all when no argument)
+
+General
+- wdcli help | wdcli version | wdcli whoami
+
+Tenant
+- wdcli tenant list                      registered tenants and aliases
+- wdcli tenant login <alias>             tenanted access
+- wdcli tenant logout                    remove the stored tenanted token
+- wdcli tenant open <alias>              open the tenant in the browser
+- wdcli tenant token                     print the current tenanted access token (a secret)
+
+Promotion levels documented for apps: Implementation (Implementation and Implementation Preview
+tenants), Sandbox (Sandbox and Sandbox Preview), Production. Only `implementation` appears as a
+literal --level value in the docs; confirm others with `wdcli app promote --help`.
+Installed apps can't be removed from Implementation, Sandbox or Production tenants; install and
+configure them in the tenant's App Manager.
+
+## 5. Proxy servers
+
+WDCLI honours the standard `http_proxy` / `https_proxy` / `no_proxy` environment variables
+(upper- or lower-case), e.g. http_proxy=http://username:password@proxy.example.com:8080.
+Windows: set them as system environment variables (restart may be needed) or per session before
+running a command. macOS/Linux: export them in the shell profile or per session.
+Documentation inconsistencies: the variables table on that page is headed http_server /
+https_server / no_proxy while its examples use http_proxy / https_proxy, and its examples run
+`wdcli wql:dataSources:list` / `wcpcli wql:dataSources:list`, which are legacy WCP CLI commands.
+Avoid putting proxy passwords in shared scripts.
+
+## 6. Legacy WCP CLI (wcpcli) — no longer maintained
+
+Commands (for reading old scripts): apps:builds <version>, apps:builds:logs <build>, apps:list
+[-c company] [-f json|tabular] [-l limit], apps:sources <version>, apps:versions <app>,
+auth:login (token saved locally and copied to the clipboard), auth:logout, auth:tenanted:login
+[-b bypass SAML redirect] [-t tenant-alias], auth:tenanted:logout, companies:list, config:set
+<paramName> [paramValue] (e.g. defaultCompanyShortId, defaultTenantAlias), config:show
+[paramName], tenants:list, tenants:open [-t alias], version [-c check latest],
+wql:datasources:list [-a alias] [-s search] [-l limit], wql:datasources:fields <datasourceId>,
+wql:query "<WQL>" [-l limit] (e.g. wcpcli wql:query -l 5 "SELECT fullName FROM allWorkers").
+Migrate to wdcli; it has no documented WQL commands.
+
+## 7. Working with local files
+
+Download Source (Developer Site, app related actions) gives a ZIP of the app source.
+Local Disk Sync (Chromium browser; Extend SKU needed for integration apps): Developer Site > Build an
+Extend App / Build an Integration App > Open from Local Folder > choose the folder; Orchestration
+Builder and App Builder sync edits to disk (blue indicator) and pick up external edits. Choose
+Open from Local Folder every session. Update App Hub with Save to App Hub or `wdcli app upload`.
+This enables Git version control of app source.
+
+## 8. Typical sequences
+
+Human release:
+  wdcli auth login → wdcli whoami → wdcli app versions <ref> → wdcli app builds <ref> →
+  wdcli app builds logs <buildId> (on errors) → wdcli tenant login <alias> →
+  wdcli app deploy <ref> --tenant-alias <alias> --version <v> → wdcli app promote <ref> --level implementation
+CI pipeline (sketch): secrets WDCLI_CLIENT_ID / WDCLI_CLIENT_SECRET from the CI secret store →
+  wdcli auth login --system-user → wdcli app upload → wdcli app versions / builds / builds logs to
+  gate on build success. Deployment to a tenant still requires tenant credentials.

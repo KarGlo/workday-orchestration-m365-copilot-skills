@@ -1,0 +1,124 @@
+# Orchestration Settings, credentials, retries, polling, CSV formats, aggregations
+
+Sources: Workday Developer documentation (Create Orchestration Credentials; Create AWS Signature v4
+Credentials; Define HTTP Retry Policies; Define HTTP Polling Configurations; Create CSV Formats;
+Add Aggregations; Group Steps; Create Loop Early Stop Conditions; Concept: Async Orchestration
+Cancellation; Export OpenAPI Specifications for Orchestrations), retrieved 2026-10-02.
+
+Open settings with the gear icon above the canvas. Tabs include Credentials, AWSv4, HTTP Retries,
+HTTP Polling, CSV Formats; Async orchestrations also have cancellation settings; Sync/Async
+orchestrations offer Download OpenAPI.
+
+## Credentials (Settings > Credentials)
+
+Types: API Key, Basic Auth, OAuth, ISU (Integration System User).
+- API Key: Key + Value, appended to Query Params or Header.
+- Basic Auth: Username + Password.
+- OAuth: Cred Store Reference (Reference + Client Authentication in header or body) or Token
+  (Token + Scheme). Workday recommends Cred Store Reference for production, and rotating Cred
+  Store credentials at least a week before expiry with both versions valid during the overlap.
+- ISU: Name + Username expression (the ISU's user name). Requires the ISU setup below.
+  ISU works with Send Workday API Request. With Trigger Business Process Workday recommends access
+  tokens instead.
+Workday steps additionally offer Default Workday API Credential and Access Token from Initiating
+User. The default endpoint authentication for Integration System orchestrations is Access Token
+From Initiating User. Business Process orchestrations require a credential (ISU or initiating
+user); BP orchestrations launched on Cancel/Rescind/Correct/Deny must use ISU for API calls.
+Workday calls ISU authentication "always a security exception": prefer configuring the ISU on the
+integration system or on the business process's Orchestration Service step; with ISU access the
+app must check the end user's roles itself.
+
+ISU setup (tenant + App Manager):
+1. Create Integration System User task (session timeout 0).
+2. Create Security Group: Integration System Security Group (Unconstrained); add the ISU.
+3. Maintain Permissions for Security Group: View/Modify on domains for REST APIs used,
+   Get/Put on domains for SOAP APIs used; model domains for Extend apps.
+4. Activate Pending Security Policy Changes.
+5. App Manager > app > Configure > Integration System Users > Add Integration System User
+   (needs the WCP Integration System User Security domain with Modify) > Create API Client
+   (name format: App: <appReferenceID> Env: <environment> Tenant: <tenant> ISU: <isu>);
+   optionally edit its scopes on the Developer Site (API Clients > All Clients).
+6. Create the ISU credential in the orchestration.
+
+AWS Signature v4 (Settings > AWSv4): Name; Type = CredStore Reference (Access Key ID stored with the
+tenant task "Create AWS Access Key CredStore") or Temporary Security Token (development tenants
+only: Access Key ID, Secret Access Key, Session Token); AWS Region (e.g. us-west-2); AWS Service
+(e.g. S3). Used by Send HTTP Request against AWS services and by the AWS components.
+
+## HTTP retry policies (Settings > HTTP Retries)
+
+Fields: Name; Maximum Total Retries (max 60); Default Backoff Strategy (Retry Interval ms,
+Increment Factor, Max Interval ms); Successful Response Code Ranges (optional).
+
+**Important behaviour:** without a custom retry policy that defines a success range, an
+unsuccessful HTTP response does NOT fail the orchestration. To make non-2xx responses fail, create
+a policy with a success range (e.g. 200-299) — Workday's own samples do this with
+maxTotalRetries 0 — or test responseStatusCode explicitly.
+
+Condition sets (Add a Set of Conditions): Header, Header Value, Status Code, Status Code Range,
+Soap (SOAP response code), Response Timeout, Connection Timeout, Retry on Any Failure, Custom
+(expression; may use currentStep, the step's own output). All conditions in a set must match;
+sets are evaluated in order and the first fully matched set decides backoff and max retries.
+Per-set backoff: default, Exponential Interval, or Retry-After Header (with Max Interval ms).
+Policies apply to Send HTTP Request, Send WWS Pagination API Request and Send Workday API Request
+(selected in each step's Settings tab).
+Default policy seen in Workday sample exports: retry on 408, 409, 423, 425; on 429/503 honouring
+Retry-After (and a plain 429/503 set); default back-off interval 1,000 ms, increment factor 1.0
+(constant interval), max interval 300,000 ms; success range 200-299; maxTotalRetries 0 in most
+samples, which disables retries while still failing on non-2xx.
+
+## HTTP polling (Settings > HTTP Polling) — Send HTTP Request only
+
+Available in IS and BP orchestrations; external systems only (not Workday APIs).
+Fields: Name; Total Polling Duration (max 2,880 min = 48 h); Starting Interval (1-60 min, default
+15) — the interval doubles after each attempt up to 60 min; Error On Timeout (log an error that an
+error handler can catch).
+Stop conditions (all must be met): Header, Header Value, Status Code, Status Code Range, Custom
+(expression on currentStep, global functions, launch parameters or app attributes — not upstream
+step outputs). If the duration elapses first, the run continues with the last polling response.
+Pre-exponential configurations show a "legacy configuration" notice until re-saved.
+Example (docs): duration 120 min, start 2 min → polls after 2, 4, 8, ... up to 60-minute
+intervals until both stop conditions hold or 120 min pass.
+
+## CSV formats (Settings > CSV Formats)
+
+Name; Header Row; Separator (default `,`); Escape (default `\`); Quote (default `"`); Columns
+(name, required flag). Used by Log to File and by CSV Fold aggregations.
+
+## Aggregations (loop related actions > Add Aggregation)
+
+For Loop, Batch Loop, Join Loop. Each output: Name, Strategy, optional Condition (aggregate only
+matching items), Fail When No Inputs.
+Strategies: XML Fold (fragment, XML declaration, header/footer, line separator, namespaces, XPath
+node), CSV Fold (string list row or a CSV format), JSON Fold (fragments into one array), Text Fold
+(text, content type, line separator, header/footer), Number List, String List, Boolean List,
+Maximum, Minimum, Sum, Count, Date List, Local Date Time List, Local Time List, Zoned Date Time
+List, Zip Archive (data + path in archive), String/Number/Boolean/Date/Local Date Time/Local
+Time/Zoned Date Time Map (key + value), Custom Fold (Output Type String, Boolean, Number, Text,
+Data, StringList, BooleanList, NumberList, JSON, XML, CSV, Date, LocalTime, LocalDateTime,
+ZonedDateTime; Initial Value + Next Value).
+In exports aggregations appear as Aggregate nodes.
+
+## Async cancellation (Async orchestrations, Settings)
+
+Off by default. "Allow users to cancel the orchestration at a specified point" + Cancellation
+Barrier at the end (cancellable anywhere) or at a chosen step (that step and later are not
+cancellable). Cancel via PUT with a tenanted bearer token:
+    PUT https://api.workday.com/orchestrate/v1/apps/{appId}/orchestrations/{orchestrationName}/cancel/{instanceId}
+The instance ID is returned in the X-Orchestrate-Id header of the launch response and appears in
+logs. Orchestration Activity also offers Cancel (graceful, at the next safe point) and Kill
+(immediate, risks inconsistency).
+
+## OpenAPI export (Sync and Async)
+
+Define inputs on the start step and outputs on the end step, Save to App Hub, then Settings >
+Download OpenAPI. Use the document in Postman or third-party tooling.
+
+## Other build features
+
+- Group Steps: drag-select > Create Group; only the last step's output is visible downstream.
+- Loop Early Stop Condition: output did.Stop.Early; optional Force Sequential Processing.
+- Character Mapping: transforms text by mapping source characters to target characters (global
+  `mapping` functions and replaceCharactersUsingMapping member functions).
+- Validate (toolbar) checks the orchestration; Save to App Hub validates, saves and creates a
+  build log. Cut/copy/paste steps with Ctrl/Command + x/c/v (pasted at the end).

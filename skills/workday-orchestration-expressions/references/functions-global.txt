@@ -1,0 +1,513 @@
+# Orchestrate Expression Language: global functions
+
+Source: Workday Developer documentation, Integration Apps > Orchestrate Expression Language (retrieved 2026-10-02).
+Format of each entry: name(argument: Type, ...) -> ReturnType, followed by the documented behaviour.
+Global functions are called with their qualifier, for example lp.stringParam("Name"); functions without a qualifier are called by name.
+Member functions are appended to a value of the given type, for example data.Step.response.stringAtJsonPath("$.id").
+
+## Attrstore (qualifier: attrstore)
+
+- booleanValue(name: String) -> Boolean
+  Returns the specified attribute value from the tenanted attribute store for this orchestration. Throws an exception if the specified value isn't a boolean or doesn't exist.
+- numberValue(name: String) -> Number
+  Returns the specified attribute value from the tenanted attribute store for this orchestration. Throws an exception if the specified value isn't a number or doesn't exist.
+- stringValue(name: String) -> String
+  Returns the specified attribute value from the tenanted attribute store for this orchestration. Throws an exception if the specified value isn't a string or doesn't exist.
+
+## Business Process (qualifier: bp)
+
+- bp.actionEvent()() -> String
+  Returns the BP action from the BP trigger launch request.
+- bp.eventInitiationDateTime()() -> ZonedDateTime
+  Returns the BP action event initiation date and time as a ZonedDateTimeType value.
+- bp.eventTarget()() -> InstanceReference
+  Returns the BP action event target as an InstanceReference value.
+- bp.initiatingPerson()() -> InstanceReference
+  Returns the BP action event initiating person as an InstanceReference value.
+- bp.aboutPerson()() -> InstanceReference
+  Returns the BP action event about person as an InstanceReference value.
+
+## Context (qualifier: context)
+
+- appReferenceId() -> String
+  Returns the WCP Extend application reference ID for the application that contains the orchestration.
+- orchestrateId() -> String
+  Returns the orchestration instance ID (X-Orchestrate-Id) for the workflow execution.
+- subject() -> String
+  Returns the ID token, if one was used to launch the orchestration.
+- subjectWithDefault(defaultValue: String) -> String
+  Returns the subject of the ID token, if one was used to launch the orchestration. Otherwise returns the specified default.
+- tenant() -> String
+  Returns the name of the tenant executing the orchestration.
+
+## Date (qualifier: date)
+
+- now() -> Date
+  Returns the current date in the default time zone.
+- now(zoneID: String) -> Date
+  Returns the current date in the specified time zone.
+- parse(text: String) -> Date
+  Returns an instance of LocalDate obtained from a text string
+- parse(text: String, pattern: String) -> Date
+  Returns an instance of LocalDate obtained from a text string and formatted using the specified pattern.
+
+## DateTime (qualifier: datetime)
+
+- now() -> Date
+  Returns the current date-time in the default time zone.
+- now(zoneID: String) -> Date
+  Returns the current date-time in the specified time zone.
+- parse(text: String, pattern: String) -> Date
+  Returns an instance of LocalDateTime obtained from a text string and formatted using the specified pattern.
+- parse(text: String, pattern: String) -> Date
+  Returns an instance of LocalDateTime obtained from a text string and formatted using the specified pattern.
+
+## Documents (qualifier: documents)
+
+- documentId(id: String) -> DocumentAccessor
+  Filters event documents for documents matching the specified document ID.
+- documentIds(id: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the specified document IDs.
+- get() -> Data
+  Returns the first document matching the applied filters.
+- get(n: Number) -> Data
+  Returns the nth document matching the applied filters.
+- getDocumentCount() -> Number
+  Returns the number of event documents.
+- getDocumentId(n: Number) -> String
+  Returns the document ID of the event document at the specified index.
+- getDocumentIds() -> StringList
+  Returns the document IDs of the event documents.
+- getFileName(n: Number) -> String
+  Returns the filename of the event document at the specified index.
+- getFileNames() -> StringList
+  Returns the filenames of the event documents.
+- getFileSize(n: Number) -> NumberList
+  Returns the file size of the event document at the specified index.
+- getFileSizes() -> NumberList
+  Returns the file sizes of the event documents.
+- getLabelWids() -> StringList
+  Returns the label WIDs of the event documents.
+- getLabelWids(n: Number) -> StringList
+  Returns the label WIDs of the event document at the specified index.
+- getLabels() -> StringList
+  Returns the labels of the event documents.
+- getLabels(n: Number) -> StringList
+  Returns the labels of the event document at the specified index.
+- iterator() -> DataIterator
+  Returns an iterator of the event documents, taking account of any filters and sorting previously applied to the object.
+- labelWids(ids: StringList) -> DocumentAccessor
+  Filters event documents for documents matching all of the specified label IDs.
+- labelWidsMatchAny(ids: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the specified label IDs.
+- labels(labels: StringList) -> DocumentAccessor
+  Filter event documents for documents matching all of the specified labels.
+- labelsMatchAny(labels: StringList) -> DocumentAccessor
+  Filter event documents for documents matching any of the specified labels.
+- minFileSize(size: Number) -> DocumentAccessor
+  Filters event documents for documents with a file size greater than or equal to the specified size.
+- names(names: StringList) -> DocumentAccessor
+  Filters event documents for documents matching any of the specified filenames.
+- sortFileNameAsc() -> DocumentAccessor
+  Sorts event documents alphabetically in ascending order.
+- sortFileNameDesc() -> DocumentAccessor
+  Sorts event documents alphabetically in descending order.
+- sortFileSizeAsc() -> DocumentAccessor
+  Sorts event documents by file size in ascending order.
+- sortFileSizeDesc() -> DocumentAccessor
+  Sorts event documents by file size in descending order.
+
+## InstanceRef (qualifier: InstanceRef)
+
+- createReference(idTypes: StringList, values: StringList) -> InstanceReference
+  Returns an InstanceReference type using the specified idTypes and their corresponding values.
+- createReference(idTypes: StringList, parentIDs: StringList, parentTypes: StringList, values: StringList) -> InstanceReference
+  Returns an InstanceReference type using the specified idTypes, parentIDs, parentTypes, and values.
+- createReference(idType: String, value: String) -> InstanceReference
+  Returns an InstanceReference type with 1 ID using the specified idType and value.
+- createReference(idType: String, parentID: String, parentType: String, value: String) -> InstanceReference
+  Returns an InstanceReference type with 1 ID using the specified idType, parentID, parentType, and value.
+- createReferenceList(idTypes: StringList, values: StringList) -> InstanceReferenceList
+  Returns an InstanceReferenceList type using the specified idTypes and their corresponding values. Each constituent instance reference has 1 ID.
+- createReferenceList(idTypes: String, values: StringList) -> InstanceReferenceList
+  Returns an InstanceReferenceList Type in which all instances use the same idType. Each constituent instance reference has 1 ID with the specified idType and corresponding value from the values list.
+- createReferenceList(idTypes: StringList, values: StringList, parentIDs: StringList, parentTypes: StringList) -> InstanceReferenceList
+  Returns an InstanceReferenceList Type using the provided idTypes, values, parentIDs, and parentTypes. Each constituent instance reference has 1 ID.
+- integrationReference(idTypes: StringList, values: StringList) -> InstanceReference
+  Returns an InstanceReference type using the specified idTypes and their corresponding values.
+
+## Intsys (qualifier: intsys)
+
+- attachmentContent(attachmentServiceName: String) -> Data
+  Returns the binary content of the attachment in the specified attachment service. Throws an exception if no such attachment service exists.
+- attachmentFileID(attachmentServiceName: String) -> String
+  Returns the file ID of the attachment in the specified attachment service. Throws an exception if no such attachment service exists.
+- attachmentFileName(attachmentServiceName: String) -> String
+  Returns the file name of the attachment in the specified attachment service. Throws an exception if no such attachment service exists.
+- attachmentServices() -> StringList
+  Returns the names of all attachment services.
+- attributeExists(attributeName: String) -> Boolean
+  Returns true if an attribute with the specified name exists.
+- attributeExists(attributeName: String) -> Boolean
+  Returns true if an attribute with the specified name exists in the specified integration service.
+- attributeNames() -> StringList
+  Returns the names of all attributes.
+- attributeType(attributeName: String) -> Number
+  Returns the type of the specified attribute: 1 for Text 2 for Date 3 for DateTime 4 for Number 5 for Boolean 6 for Instance Reference 7 for Environment Reference Throws an exception if no such attribute exists.
+- attributeType(attributeName: String, serviceName: String) -> Number
+  Returns the type of the specified attribute in the specified integration service: 1 for Text 2 for Date 3 for DateTime 4 for Number 5 for Boolean 6 for Instance Reference 7 for Environment Reference Throws an exception if there no such attribute or service exists.
+- booleanAttributeValue(attributeName: String) -> Boolean
+  Returns the boolean value of the specified attribute. Throws an exception no such attribute exists.
+- booleanAttributeValue(attributeName: String, serviceName: String) -> Boolean
+  Returns the boolean value of the specified attribute in the specified integration service. Throws an exception if no such attribute exists.
+- booleanAttributeValueOrDefault(attributeName: String, defaultValue: Boolean) -> Boolean
+  Returns the boolean value of the specified attribute if it exists and a value is defined. Otherwise returns the specified default.
+- booleanAttributeValueOrDefault(attributeName: String, serviceName: String, defaultValue: Boolean) -> Boolean
+  Returns the boolean value of the named attribute in the specified integration service if it exists and a value is defined. Otherwise returns the specified default.
+- booleanAttributeValueWithDefault(attributeName: String, defaultValue: String) -> Boolean
+  Returns the boolean value of the specified attribute if it exists. Otherwise returns the specified default.
+- booleanAttributeValueWithDefault(attributeName: String, serviceName: String, defaultValue: String) -> Boolean
+  Returns the boolean value of the specified attribute in the specified integration service if it exists. Otherwise returns the specified default.
+- integrationServiceExists(integrationServiceName: String) -> Boolean
+  Returns true if an integration service with the specified name exists.
+- mapContains(mapName: String, key: String) -> Boolean
+  Returns true if the specified map contains a mapping for the specified key. Throws an exception if no such map exists.
+- mapContains(mapName: String, key: String, referenceType: String) -> Boolean
+  Returns true if the specified map contains a mapping for the specified key and specified reference type. Throws an exception if no such map exists.
+- mapDefaultValue(mapName: String) -> Boolean
+  Returns the default value of the specified map. Throws an exception if no such map exists or if the map doesn't have a default.
+- mapExists(mapName: String) -> Boolean
+  Returns true if a map with the specified name exists.
+- mapHasDefaultValue(mapName: String) -> Boolean
+  Returns true if the specified map has a default value. Throws an exception if no such map exists.
+- mapIsEmpty(mapName: String) -> Boolean
+  Returns true if the specified map is empty (regardless of whether it has a default).
+- mapLookup(mapName: String, key: String) -> String
+  Returns the value for the specified key in the specified map. Otherwise returns the map's default, if one exists. Throws an exception if the map doesn't exist, or if no such mapping exists and the map doesn't have a default.
+- mapLookup(mapName: String, key: String, referenceType: String) -> String
+  Returns the value for the specified key and reference type in the specified map. Otherwise returns the map's default, if one exists. Throws an exception if the map doesn't exist, or if no such mapping exists and the map doesn't have a default.
+- mapLookupType(mapName: String, key: String, referenceType: String) -> Number
+  Returns the type of the value for the specified key in the specified map: 1 for Text 2 for Date 3 for DateTime 4 for Number 5 for Boolean 6 for Instance Reference 7 for Environment Reference Throws an exception if the map doesn't exist, or if no such mapping exists.
+- mapLookupType(mapName: String, key: String, referenceType: String) -> Number
+  Returns the type of the value for the specified key and reference type in the specified map: 1 for Text 2 for Date 3 for DateTime 4 for Number 5 for Boolean 6 for Instance Reference 7 for Environment Reference Throws an exception if the map doesn't exist, or if no such mapping exists.
+- mapLookupWithDefault(mapName: String, key: String, defaultValue: String) -> String
+  Returns the value for the specified key in the specified map. Otherwise returns the specified default value. Throws an exception if the map doesn't exist.
+- mapLookupWithDefault(mapName: String, key: String, referenceType: String, defaultValue: String) -> String
+  Returns the value for the specified key and reference type in the specified map. Otherwise returns the specified default value. Throws an exception if the map doesn't exist.
+- mapNames() -> StringList
+  Returns the names of all maps.
+- mapReverseLookup(mapName: String, externalValue: String, index: Number) -> String
+  Returns the string value of the internal value at the specified index that maps to the specified external value in the specified map.
+- mapReverseLookup(mapName: String, externalValue: String, index: Number, referenceIdType: String) -> String
+  Returns the string value of the specified type at the specified index that maps to the specified external value in the specified map.
+- mapReverseLookupCount(mapName: String, externalValue: String) -> Number
+  Returns the number of internal values that map to the specified external value in the specified map. Throws an exception if no such map exists.
+- mapReverseLookupWithDefault(mapName: String, externalValue: String, index: Number, defaultValue: String) -> String
+  Returns the string value of the internal value at the specified index that maps to the specified external value in the specified map. If the external value doesn't exist in the map, returns the specified default.
+- mapReverseLookupWithDefault(mapName: String, externalValue: String, index: Number, referenceIdType: String, defaultValue: String) -> String
+  Returns the string value of the internal value at the specified index that maps to the specified external value in the specified map, with the specified reference type. If the external value doesn't exist in the map, returns the specified default.
+- mapReverseLookupWithIntMapDefault(mapName: String, externalValue: String, index: Number) -> String
+  Returns the string value of the nth internal value that maps to the specified external value in the specified map. If the external value doesn't exist in the map, returns the default defined in the integration map.
+- mapReverseLookupWithIntMapDefault(mapName: String, externalValue: String, index: Number, referenceIdType: String) -> String
+  Returns the reference of the specified type for the specified attribute. Throws an exception if no such attribute exists, or if no reference of the specified type exists.
+- referenceAttributeValue(attributeName: String, referenceType: String) -> String
+  Returns the reference of the specified type for the specified attribute. Throws an exception if no such attribute exists, or if no reference of the specified type exists.
+- referenceAttributeValue(attributeName: String, serviceName: String, referenceType: String) -> String
+  Returns the reference of the specified type for the specified attribute in the specified integration service. Throws an exception if no such attribute or service exists, or if no reference of the specified type exists.
+- referenceAttributeValues(attributeName: String, referenceType: String) -> StringList
+  Returns the references of the specified type for the specified attribute. Throws an exception if no such attribute exists.
+- referenceAttributeValues(attributeName: String, serviceName: String, referenceType: String) -> Stringlist
+  Returns the references of the specified type for the specified attribute in the specified integration service. Throws an exception if no such attribute or service exists, or if no reference of the specified type exists.
+- referenceAttributeValueOrDefault(attributeName: String, referenceType: String, defaultValue: String) -> String
+  Returns the reference of the specified type for the specified attribute. Throws an exception if no such attribute exists. Returns the specified default if no reference of the specified type exists.
+- referenceAttributeValueOrDefault(attributeName: String, serviceName: String, referenceType: String, defaultValue: String) -> String
+  Returns the reference of the specified type for the specified attribute. Throws an exception if no such service or attribute exists. Returns the specified default if no reference of the specified type exists.
+- referenceAttributeValuesOrDefault(attributeName: String, referenceType: String, defaultValues: StringList) -> StringList
+  Returns the references of the specified type for the named attribute. Throws an exception if no such attribute exists. Returns the specified default if no references of the specified type exists.
+- referenceAttributeValuesOrDefault(attributeName: String, serviceName: String, referenceType: String, defaultValues: StringList) -> StringList
+  Returns the references of the specified type for the specified attribute in the specified integration service. Throws an exception if no such service or attribute exists. Returns the specified default if no references of the specified type exists.
+- reportServices() -> StringList
+  Returns list of report service names.
+- reportPath(reportAlias: String) -> String
+  Returns the path of the first report that matches the specified report alias. The returned path has the form "owner/report_name". Example: lmcneil/Worker_Export.
+- reportPath(reportAlias: String, reportService: String) -> z
+  Returns the path of the first report that matches the specified report alias and report service. The returned path has the form "owner/report_name". Example: lmcneil/Worker_Export.
+- reportXsd(reportAlias: String) -> Xml
+  Returns XSD schema content as XML for the first report that matches the specified report alias.
+- reportXsd(reportAlias: String, reportService: String) -> Xml
+  Returns XSD schema content as XML for the first report that matches the specified report alias and report service.
+- reportWsdl(reportAlias: String) -> Xml
+  Returns WSDL content as XML for the first report that matches the specified report alias.
+- reportWsdl(reportAlias: String, reportService: String) -> Xml
+  Returns WSDL content as XML for the first report that matches the specified report alias and report service.
+- reportXsdSimple(reportAlias: String) -> Xml
+  Returns simple format XSD schema content as XML for the first report that matches the specified report alias.
+- reportXsdSimple(reportAlias: String, reportService: String) -> Xml
+  Returns simple format XSD schema content as XML for the first report that matches the specified report alias and report service.
+- stringAttributeValueOrDefault(attributeName: String, defaultValue: String) -> String
+  Returns the string value of the specified attribute if it exists and a value is defined. Otherwise returns the specified default.
+- stringAttributeValueOrDefault(attributeName: String, serviceName: String, defaultValue: String) -> String
+  Returns the string value of the specified attribute in the specified integration service if it exists and a value is defined. Otherwise returns the specified default.
+- stringAttributeValue(attributeName: String) -> String
+  Returns the string value of the specified attribute. Throws an exception if no such attribute exists.
+- stringAttributeValue(attributeName: String, serviceName: String) -> String
+  Returns the string value of the specified attribute in the specified integration service. Throws an exception if no such attribute or service exists.
+- stringAttributeValueWithDefault(attributeName: String, defaultValue: String) -> String
+  Returns the string value of the specified attribute. Otherwise returns the specified default.
+- stringAttributeValueWithDefault(attributeName: String, serviceName: String, defaultValue: String) -> String
+  Returns the string value of the specified attribute in the specified integration service, if it exists. Otherwise returns the specified default.
+- stringMapIterator(mapName: String) -> StringMap
+  Returns a String Map containing all text-valued key-value pairs from the specified integration map. Entries whose values are reference-typed (non-text) are excluded. Example: given an integration map named "map1" configured with the key/value entries key1_1val1_1key1_2val1_2 , the expression intsys.stringMapIterator("map1") produces the output { "key1_1": "val1_1", "key1_2": "val1_2" } . If the map exists but has no text-valued entries, an empty map is returned. If no map with the given name exists, an exception is thrown. The returned map can be consumed inline (example: .get("key1_1") returns "val1_1" ) or stored in a data context and disposed later.
+
+## List (qualifier: list)
+
+- bigDecimalList(value: BigDecimal) -> BigDecimalList
+  Returns the specified BigDecimal arguments as a list.
+- booleanList(value: Boolean) -> BooleanList
+  Returns the specified Boolean arguments as a list.
+- dateList(value: Date) -> DateList
+  Returns the specified Date arguments as a list.
+- localDateTimeList(value: LocalDateTime) -> LocalDateTimeList
+  Returns the specified LocalDateTime arguments as a list.
+- localTimeList(value: LocalTime) -> LocalTimeList
+  Returns the specified LocalTime arguments as a list.
+- numberList(value: Number) -> NumberList
+  Returns the specified Number arguments as a list.
+- stringList(value: String) -> StringList
+  Returns the specified String arguments as a list.
+- zonedDateTimeList(value: ZonedlDateTime) -> ZonedlDateTimeList
+  Returns the specified ZonedDateTime arguments as a list.
+
+## LocalTime (qualifier: localtime)
+
+- now() -> LocalTime
+  Returns the current date from the system clock in the default time zone.
+- now(zoneID: String) -> LocalTime
+  Returns the current date from the system clock in the specified time zone
+- parse(text: String) -> LocalTime
+  Returns an instance of LocalDate from the specified text string. Example: 2023-02-04.
+- parse(text: String, pattern: String) -> LocalTime
+  Returns an instance of LocalDate from the specified text string, formatted according to the specified pattern.
+
+## Lp (qualifier: lp)
+
+- booleanParam(label: String) -> Boolean
+  Returns the runtime parameter with the specified label as a Boolean value. Throws an exception if the parameter isn't a Boolean type.
+- booleanParam(provider: String, label: String) -> Boolean
+  Returns the runtime parameter from the specified provider with the specified label as a Boolean value. Throws an exception if the parameter isn't a Boolean type.
+- date(label: String) -> String
+  Returns the runtime parameter with the specified label in ISO format with an offset. Example: "2011-12-03+01:00".
+- date(provider: String, label: String) -> String
+  Returns the runtime parameter from the specified provider with the specified label in ISO format with an offset. Example: "2011-12-03+01:00".
+- dateParam() -> Date
+  Returns the runtime parameter with the specified label as a Date type.
+- dateParam() -> Date
+  Returns the runtime parameter from the specified provider and with the specified label as a Date type.
+- dateTimeParam(label: String) -> ZonedDateTime
+  Returns the runtime parameter with the specified label as a ZonedDateTime type value.
+- dateTimeParam(label: String) -> ZonedDateTime
+  Returns the runtime parameter from the specified provider with the specified label as a ZonedDateTime type value.
+- descriptor(label: String, wid: String) -> String
+  Returns the descriptor of the instance matching the specified wid for the Instance Set Reference runtime parameter with the specified label.
+- descriptor(provider: String, label: String, wid: String) -> String
+  Returns the descriptor of the instance matching the specified wid for the Instance Set Reference runtime parameter from the specified provider with the specified label.
+- exists(label: String) -> Boolean
+  Returns true if the runtime parameter with the specified label is defined and isn't null.
+- exists(provider: String, label: String) -> Boolean
+  Returns true if the runtime parameter from the specified provider with the specified label is defined and isn't null.
+- existsAndHasValue(label: String) -> Boolean
+  Returns true if the runtime parameter with the specified label is defined and has a value.
+- existsAndHasValue(provider: String, label: String) -> Boolean
+  Returns true if the runtime parameter from the specified provider with the specified label is defined and has a value.
+- getInstanceReferenceList(label: String) -> String
+  Returns an Instance Reference List with the specified label from the launch parameter. Use this function for pass-through scenarios where you need to retrieve complex Instance Reference data directly from launch parameters.
+- getInstanceReferenceList(provider: String, label: String) -> String
+  Returns an Instance Reference List with the specified provider and label from the launch parameter. Use this function for pass-through scenarios where you need to retrieve complex Instance Reference data from a specific provider's launch parameters.
+- integrationEventWid() -> String
+  Returns the WID of the integration event.
+- integrationSystemId() -> String
+  Returns the id of the integration system.
+- integrationSystemWid() -> String
+  Returns the WID of the integration system.
+- integrationTemplateName() -> String
+  Returns the name of the integration template.
+- integrationTemplateWid() -> String
+  Returns the WID of the integration template.
+- numberParam(label: String) -> Number
+  Returns the runtime parameter with the specified label as a Number type value (as a Double) if the parameter is a Numeric type, otherwise throws an exception.
+- numberParam(provider: String, label: String) -> Number
+  Returns the runtime parameter from the specified provider with the specified label as a Number type value (as a Double) if the parameter is a Numeric type, otherwise throws an exception.
+- numberParamWithDefault(label: String, defaultValue: String) -> Number
+  Returns the runtime parameter with the specified label as a Number type value (as a Double) if the parameter is a Numeric type. Returns the default value if the parameter doesn't exist.
+- numberParamWithDefault(provider: String, label: String, defaultValue: String) -> Number
+  Returns the runtime parameter from the specified provider with the specified label as a Number type value (as a Double) if the parameter is a Numeric type. Returns the default value if the parameter doesn't exist.
+- parentEventWid() -> String
+  Returns the WID of the parent event.
+- referenceData(label: String, type: String) -> String
+  Returns the value of first 'ID' element whose 'type' attribute matches the specified type for the Instance Set Reference runtime parameter with the specified label.
+- referenceData(provider: String, label: String, type: String) -> String
+  Returns the value of first 'ID' element whose 'type' attribute matches the specified type for the Instance Set Reference runtime parameter from the specified provider with the specified label.
+- referenceDataList(label: String, type: String) -> StringList
+  Returns the values of the 'ID' elements whose 'type' attribute matches the specified type for the Instance Set Reference runtime parameter with the given label.
+- referenceDataList(provider: String, label: String, type: String) -> StringList
+  Returns the values of the 'ID' elements whose 'type' attribute matches the specified type for the Instance Set Reference runtime parameter from the specified provider and with the given label.
+- sentOn() -> String
+  Returns the value of the 'Sent_On' element.
+- sentOnAsDateTime() -> ZonedDateTime
+  Returns the value of the Sent_On element as a ZonedDateTime type.
+- sequencedValue() -> String
+  Returns the sequenced value.
+- sequencedValue(Name: String) -> String
+  Returns the sequenced value that corresponds to the Sequencer Reference with the specified name.
+- sequencedValue(Type: String, Value: String) -> String
+  Returns the sequenced value that corresponds to the Sequencer Reference with the specified type and value.
+- simpleData(label: String) -> String
+  Returns the runtime parameter with the specified label.
+- simpleData(provider: String, label: String) -> String
+  Returns the runtime parameter from the specified provider with the specified label.
+- stringParam(label: String) -> String
+  Returns the runtime parameter with the specified label as a String type value if the parameter is a Text type, otherwise throws an exception.
+- stringParam(provider: String, label: String) -> String
+  Returns the runtime parameter from the specified provider with the specified label as a String type value if the parameter is a Text type, otherwise throws an exception.
+- userName() -> String
+  Returns the name of the system user.
+- userWid() -> String
+  Returns the wid of the system user.
+- wids(label: String) -> StringList
+  Returns the wids for the runtime parameter with the specified label.
+- wids(label: String) -> StringList
+  Returns the wids for the runtime parameter from the specified provider with the specified label.
+
+## Map (qualifier: map)
+
+- bigDecimalMap(key1: String, value1: BigDecimal, key2: String, value2: BigDecimal, key3: String, value3: BigDecimal) -> BigDecimalMap
+  Returns a map with the specified keys and values.
+- booleanMap(key1: String, value1: Boolean, key2: String, value2: Boolean, key3: String, value3: Boolean) -> BooleanMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- dateMap(key1: String, value1: Date, key2: String, value2: Date, key3: String, value3: Date) -> DateMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- emptyBigDecimalMap() -> BigDecimalMap
+  Returns an empty map.
+- emptyBooleanMap() -> BooleanMap
+  Returns an empty map.
+- emptyDateMap() -> DateMap
+  Returns an empty map.
+- emptyLocalDateTimeMap() -> LocalDateTimeMap
+  Returns an empty map.
+- emptyLocalTimeMap() -> LocalTimeMap
+  Returns an empty map.
+- emptyNumberMap() -> NumberMap
+  Returns an empty map.
+- emptyStringMap() -> StringMap
+  Returns an empty map.
+- emptyZonedDateTimeMap() -> ZonedDateTimeMap
+  Returns an empty map.
+- localDateTimeMap(key1: String, value1: LocalDateTime, key2: String, value2: LocalDateTime, key3: String, value3: LocalDateTime) -> LocalDateTimeMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- localTimeMap(key1: String, value1: LocalTime, key2: String, value2: LocalTime, key3: String, value3: LocalTime) -> LocalTimeMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- numberMap(key1: String, value1: Number, key2: String, value2: Number, key3: String, value3: Number) -> NumberMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- stringMap(key1: String, value1: String, key2: String, value2: String, key3: String, value3: String) -> StringMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+- zonedDateTimeMap(key1: String, value1: ZonedDateTime, key2: String, value2: ZonedDateTime, key3: String, value3: ZonedDateTime) -> ZonedDateTimeMap
+  Returns a map with the specified keys and values. To create maps with more than three values, use put or putAll .
+
+## Mapping (qualifier: mapping)
+
+- createCharacterReplacementMapping(csv: CsvType) -> StringMap
+  Uses the provided CSV file to return a mapping for character replacement in documents or strings. The CSV file should have 2 columns, representing key and replacement value. The key is a single character. The value can be 1 or more characters.
+- createCharacterReplacementMapping(csv: CsvType, upsertMapping: StringMap) -> StringMap
+  Uses the provided CSV file and string map to return a mapping for character replacement in documents or strings. The CSV file should have 2 columns, representing key and replacement value. The key is a single character. The value can be 1 or more characters. The string map values supersede the CSV values.
+- createCharacterInclusionList(csv: CsvType) -> StringList
+  Uses the provided CSV file to return a list of characters for inclusion, excluding all others. The CSV file should have 1 column containing single characters.
+- createCharacterInclusionList(csv: CsvType, additionalList: StringList) -> StringList
+  Uses the provided CSV file and string list to return a list of characters for inclusion, excluding all others. The CSV file should have 1 column containing single characters. Its contents and the contents of the string list are combined to create the inclusion list.
+
+## Math (qualifier: math)
+
+- div(x: Number, y: Number) -> Number
+  Performs numerical division.
+- minus(x: Number, y: Number) -> Number
+  Performs numerical subtraction.
+- mod(x: Number, y: Number) -> Number
+  Performs modulo operation.
+- mult(x: Number, y: Number) -> Number
+  Performs numerical multiplication.
+- plus(x: Number, y: Number) -> Number
+  Performs numerical addition.
+- power(base: Number, exponent: Number) -> Number
+  Returns the value of the base, raised to the power of the exponent.
+
+## No Qualifier (no qualifier)
+
+- data(producerID: String, outputName: String) -> Any
+  References the output of an upstream component.
+- empty(value: Any) -> Boolean
+  Returns true if the string, list, or map is empty.
+- emptyString() -> String
+  Returns an empty string.
+- isDataDefined(producerID: String, outputName: String) -> Boolean
+  Returns true if the upstream component and output name combination exists.
+- range(from: Number, to: Number) -> NumberIterator
+  Returns a number iterator for the range between between the specified from (inclusive) and to (exclusive) values.
+- range(from: Number, to: Number, step: Number) -> NumberIterator
+  Returns a number iterator for the range between between the specified from (inclusive) and to (exclusive) values with the specified step.
+- resourceData(path: String, contentType: String) -> Data
+  Returns the resource at the given path as Data.
+
+## Random (qualifier: random)
+
+- randomInteger() -> Number
+  Returns the next pseudorandom, uniformly distributed integer value from a secure random number generator's sequence.
+- randomInteger(seed: String) -> Number
+  Returns the next pseudorandom, uniformly distributed integer value from a secure random number generator's sequence seeded with the specified seed.
+- randomIntegerInRange(origin: Number, upperBound: Number) -> Number
+  Returns the next pseudorandom, uniformly distributed integer value from a secure random number generator's sequence within the specified range.
+- randomIntegerInRange(origin: Number, upperBound: Number, seed: String) -> number
+  Returns the next pseudorandom, uniformly distributed integer value from a secure random number generator's sequence within the specified range and seeded with the specified seed.
+- randomIntegerList(count: Number) -> NumberList
+  Returns a list with the specified number of pseudorandom, uniformly distributed integer values from a secure random number generator's sequence.
+- randomIntegerList(count: Number, seed: String) -> number
+  Returns a list with the specified number of pseudorandom, uniformly distributed integer value from a secure random number generator's sequence within the specified range and seeded with the specified seed.
+- randomIntegerListInRange(count: Number, origin: Number, upperBound: Number) -> number
+  Return a list with the specified number of pseudorandom, uniformly distributed integer values from a secure random number generator's sequence within the specified range.
+- randomIntegerListInRange(count: Number, origin: Number, upperBound: Number, seed: String) -> number
+  Return a list with the specified number of pseudorandom, uniformly distributed integer values from a secure random number generator's sequence within the specified range and seeded with the specified seed.
+- randomUUID() -> String
+  Returns a string containing a type 4 (pseudorandomly generated) UUID.
+
+## Resource (qualifier: resource)
+
+- csvFormat(id: String) -> CsvFormat
+  Returns a reference to the CSV format/schema resource with the specified ID.
+- fixedWidthFormat(id: String) -> FixedWidthFormat
+  Returns a reference to the fixed-width format/schema resource with the specified ID.
+- pgpCredential(id: String) -> PgpCredential
+  Returns a reference to the PGP credential resource with the specified id.
+
+## System (qualifier: system)
+
+- apiGatewayEndpoint() -> String
+  Returns the API Gateway endpoint. Example: https://api.workday.com.
+- apiGatewayHost() -> String
+  Returns the API Gateway host. Example: api.workday.com.
+- namedLogFile(name: String) -> Text
+  Retrieves the specified operational log file.
+
+## ZonedDateTime (qualifier: zoneddatetime)
+
+- now() -> Date
+  Returns an instance of ZonedDateTime in the default time zone.
+- now(zoneID: String) -> Date
+  Returns an instance of ZonedDateTime in the specified time zone.
+- parse(text: String, pattern: String) -> Date
+  Returns an instance of ZonedDateTime obtained from a text string and formatted using the specified pattern.
+- parse(text: String, pattern: String) -> Date
+  Returns an instance of ZonedDateTime obtained from a text string and formatted using the specified pattern.
+
+## Used by Workday's own orchestrations but not listed in the published reference
+
+- chars.space() -> String (inferred)  Seen 75 times in Workday sample orchestrations, inside string interpolation. Behaviour inferred from usage: a single space.
+- chars.newline() -> String (inferred)  Seen 21 times in Workday sample orchestrations. Behaviour inferred from usage: a line break.
+Treat both as unverified: confirm in Function Explorer inside Orchestration Builder before relying on them.

@@ -1,0 +1,207 @@
+# Workday Orchestrate platform facts
+
+Sources: Workday Developer documentation (Concept: Orchestration Builder; Concept: Orchestrate for
+Integrations; Concept: Orchestration Processes; Concept: Integration Events and Integration Process
+Events; Reference: Orchestration Runtime Limits; Concept: Workday Cloud Platform API Gateway;
+Steps: Create Extend App Orchestrations; Steps: Create Integration App Orchestrations; Trigger an
+Orchestration from a Business Process; Launch Orchestrations on Business Process Status Changes;
+Add Suborchestrations; Import Orchestrations and Suborchestrations; Concept: Integration App
+Lifecycle; Promote Integration Apps Through the Lifecycle; Install Integration Apps on Tenants;
+Create/Assign Integration App Attributes; Concept: Integration App Security; Create an Outbound
+Integration with Orchestrate; Reference: Orchestrate for Integrations Basic Setup; Setup
+Considerations: Integrations; Reference: Implementation Best Practices for Gold Tenants), retrieved
+2026-10-02.
+
+## 1. What Orchestrate is
+
+Orchestration Builder (browser-based, on the Workday Developer Site) builds orchestrations:
+event-driven, low-code flows across Workday and external systems. JSON and XML can be mixed; data
+produced by a step is available to every later step. Orchestrations live in apps:
+- Extend apps (with pages, model components) — all five templates.
+- Integration apps ("Orchestrate for Integrations") — Business Process and Integration System
+  templates only.
+Orchestrate executes steps top to bottom. New orchestrations get start and end steps
+automatically.
+
+## 2. Templates and their start/end steps
+
+| Template | Start step (export node) | End step | Use for |
+| Synchronous (Extend) | Orchestration Start (StartBasic) | Orchestration End (EndSync) | quick request/response, e.g. a page or external caller waiting for a result; can accept multipart requests ("Request Contains Multi-Part Data") |
+| Asynchronous (Extend) | Orchestration Start (StartAsync) | Orchestration End | long work, large data, steps that await other events (Trigger Business Process); optional user cancellation |
+| Workday Business Process | Business Process Trigger (StartBusinessProcess) | Orchestration End | launched by a business process step or a BP status change |
+| Workday Home Card (Extend) | Workday Home Card Request + Create Workday Home Card + Select Card to Return | — | data for a Workday Home card |
+| Workday Integration System | Integration Framework Trigger (StartIntegrationFrameworkTrigger) | Orchestration End | launched/scheduled from a Workday integration system; launch parameters, integration messages, output files |
+| Suborchestration | Start with configured inputs (StartSubflow) | End with configured outputs (EndSubflow) | reusable logic inside the same app |
+
+Export flow types: .maya.FlowSync, .maya.FlowAsync, .maya.FlowBusinessProcessTriggered,
+.maya.IntegrationFrameworkTrigger, .maya.FlowSubflow (one sample also shows .Mixed.MixedFlow,
+undocumented).
+
+## 3. Processes and checkpoints
+
+An orchestration runs as one or more processes. Each process may run up to 60 minutes once the
+app is promoted to production, 45 minutes before that; it has its own ID, saves state when it ends
+and hands over to the next. A new process starts after a checkpoint step (long-running
+operation): Send Workday RaaS Request, Trigger PDF Generation, Trigger Business Process, Trigger
+Integration, Send HTTP Request with polling. The 60/45-minute timer resets after the checkpoint.
+Place checkpoint steps deliberately to keep each process under the limit.
+Monitoring IDs: Run ID (instance), Process IDs, Common Request ID (links all processes), Process
+Status.
+
+## 4. Limits
+
+Execution:
+- Sync orchestration: 5 min total (Extend apps).
+- Sync orchestration triggered by a presentation page: 25 s (overrides the orchestration's own
+  timeouts; use Async if longer).
+- Async orchestration: 48 h (Extend apps).
+- Home Card orchestration: 5 min.
+- Integration System orchestration: 48 h.
+- Business process triggered by an orchestration: must complete within 90 days.
+- Recursive self-calls from a Sync orchestration: 31.
+- Individual process: 60 min (production) / 45 min (non-production).
+Data:
+- Concurrent data in memory: 200 MB (large values are kept on disk in file-backed structures).
+- Concurrent data on disk: 2 GB (released when values go out of scope).
+- Launch message: 20 MB. Single HTTP response: 500 MB.
+- Join Loop joining dataset: 500 MB. JSONPath: max 10,000 primitives per selection.
+Structure:
+- 150 orchestrations + suborchestrations per app (warning at 125).
+- 300 steps per orchestration (warning at 200).
+Gateway client timeouts for synchronous Workday API calls: REST, SOAP, RaaS, WQL 5 min; Graph API
+3 min. Send Workday API Request "Wait for Long Running Response": up to 1 h REST / 6 h SOAP.
+HTTP retry policy: max 60 retries. HTTP polling: max 48 h total, interval 1-60 min.
+Trigger Integration document storage: default 7 days, max 1 year.
+
+## 5. Triggers and wiring in the tenant
+
+### Integration System template (outbound/inbound integration)
+1. Developer Site: create the integration app, add an orchestration with the Workday Integration
+   System template, Save to App Hub, deploy to the tenant (deploying to a development tenant
+   installs the app there).
+2. Tenant: Create Integration System, Template = Orchestrate Integration Template.
+3. Related actions > Integration System > Configure Integration Attributes: Orchestration Name
+   (exactly as in Orchestration Builder) and Application Reference ID (from the app's About
+   section).
+4. Optional: Integration System > Maintain Launch Parameters (name, data type, Required, default
+   processing such as Determine Value at Runtime / Current Effective Date or Specify Value).
+   Read them with lp.* functions using the exact names.
+5. Integration > Launch / Schedule. Check the background process: Messages tab (Add Integration
+   Message output, errors) and Output Files tab (Store Document with attach = true).
+Troubleshooting: app deployed to the same tenant (App Manager), correct Orchestration Name and
+Application Reference ID.
+
+### Business Process template (launch from a BP step)
+1. Add a Workday Business Process orchestration; on Business Process Trigger > Configure Request
+   define the expected inputs. A credential is required (ISU or initiating user).
+2. Save to App Hub, deploy.
+3. Tenant: edit the BP definition, add a step of type Service = Orchestration Service, Configure
+   Orchestration Service: select the orchestration; optionally "Advance business process step when
+   orchestration completes"; choose the run-as user (previous step's user, a named user, or a user
+   from a field); map Key to Text Value / Value from Field — keys must match the trigger's inputs.
+
+### Business Process template on status change (Cancel, Rescind, Correct, Deny)
+1. Orchestration from the Business Process template; API calls must use ISU authentication.
+2. Configure the Business Process Trigger inputs; deploy.
+3. Edit Tenant Setup - Business Processes: User to Perform Orchestration Launches.
+4. BP related actions > Business Process > Configure Orchestrations > Add: Action (Cancel /
+   Rescind / Correct / Deny) and Orchestration = Create Orchestration Launch Configuration (name,
+   orchestration, Configurable Parameters). Launch configurations are never created automatically.
+5. Optional Create Condition Rule (evaluated before launch).
+Launch is by the Workday scheduler, typically within 15 minutes (longer for mass cancel/rescind).
+Status is visible in Find Events > Orchestrations tab; after Queued for Launch → In Progress a
+Relaunch option appears (condition rules aren't re-evaluated on relaunch).
+
+### Sync/Async orchestrations from pages or external callers
+Endpoint pattern used by Extend pages:
+    {{apiGatewayEndpoint}}/orchestrate/v1/apps/{{appId}}/orchestrations/<OrchestrationName>/launch
+The launch response carries X-Orchestrate-Id (instance ID). Export an OpenAPI document (Settings >
+Download OpenAPI) for external callers. Sync orchestrations may call themselves at most 31 times.
+
+### Suborchestrations
+Orchestrations panel > Suborchestrations > + ; configure inputs (Start) and outputs (End); call
+with "Call <Name>". Suborchestrations can call suborchestrations. Values are exchanged only through
+declared inputs/outputs. Trigger Business Process and Send Workday RaaS Request can't be added.
+
+### Importing
+Orchestrations panel > + > Import Existing Orchestrations: copy orchestrations (and their
+suborchestrations) from another app in your account; copies aren't linked to the originals. In an
+integration app only Integration or Business Process orchestrations can be imported.
+
+## 6. App lifecycle (integration apps; Extend is analogous)
+
+Build → Test → Verify → Release. Promotion levels:
+- Implementation Release — install on Implementation / Implementation Preview tenants; replaces the
+  previous Implementation Release.
+- Sandbox Release — promotes the latest Implementation Release; Sandbox and Sandbox Preview are
+  refreshed weekly with production data. Refresh tokens in an external client credential store
+  must exist in both Sandbox and Sandbox Preview, otherwise HTTP 500 on business objects.
+- Production Release — company administrator installs on Production after the Promote to
+  Production checklist.
+Promote/deploy on the Developer Site (Apps > app > Promotions) or with WDCLI. Installation is done
+in the tenant's App Manager worklet (Ready to Install > Install; Installed > Configure). An
+installed app can't be removed from Implementation, Sandbox or Production tenants. Cached app
+updates: about 1 minute on Implementation, up to 15 minutes on Sandbox/Production. Prerequisites
+for installing: App Manager worklet; Workday Extend domains (System functional area) with Modify
+policies; Manage: App Manager domain to manage installed apps.
+GOLD tenants (implementation tenants that become production): promote to Implementation to use
+there, still promote to Production for the production tenant; to use an Extend app right after
+go-live, promote source to Production at least 1 week before the production tenant is created.
+Migration between tenants of the same account: migrate the integration system with Object
+Transporter (Instance > Migrate) plus unreferenced items (custom reports) separately or via a
+configuration package (up to 300 instances). Between accounts: Download Source (ZIP) and create a
+new app with Upload a Zip File; tenanted components via Migration Helper.
+
+## 7. App attributes
+
+Define on the Developer Site (app Overview > Attributes: unique name, type String / Numeric /
+Boolean); saving creates a new build; deploy/update the app on the tenant. Assign values in App
+Manager > Configure > App Attributes > Update App Configuration > Edit, per Environment
+(WCPDEV, IMPL, SANDBOX, PROD) or blank for all. Values don't transfer between environments.
+Read in orchestrations with attrstore.stringValue("name") / numberValue / booleanValue — they
+throw if the attribute is missing or of another type.
+
+## 8. Security model
+
+- Workday services (REST, SOAP, WQL, RaaS) enforce domain security for the calling identity:
+  View for GET, Modify for POST/PUT/PATCH/DELETE (Report/Task permissions); SOAP needs Get/Put.
+  The REST API documentation lists the domains each endpoint needs.
+- Default endpoint authentication in Integration System orchestrations: Access Token From
+  Initiating User (REST, SOAP, Prism). ISU authentication is available for Business Process
+  orchestrations too and is "always a security exception" — the app then has to check the user's
+  roles itself (often an extra custom report call).
+- Sync and Async orchestrations in Extend apps carry security domains (review rule:
+  OrchestrationSecurityDomainRule).
+- Prefer tenant security (e.g. a RaaS report with a role-based data source) over hard-coded checks;
+  handle 403 explicitly.
+
+## 9. Network, regions and IPs (Basic Setup)
+
+Personal accounts: API gateway api.odp.wcp.workday.com (auth .../auth).
+US: api.us.wcp.workday.com, api.workday.com, auth.api.workday.com; development tenants
+wcpdev.wd101.myworkday.com. Germany: api.eu.wcp.workday.com (wd103). India: api.in.wcp.workday.com
+(wd117). Japan: api.jp.wcp.workday.com (wd109). Singapore: api.sg.wcp.workday.com (wd102). United
+Kingdom: api.uk.wcp.workday.com (wd107). All port 443.
+Third-party APIs must allowlist the region's egress IPs (listed in Reference: Orchestrate for
+Integrations Basic Setup), e.g. US: 35.80.211.71, 35.155.167.195, 44.234.22.80-83, 54.212.47.21;
+Germany: 3.69.207.32, 18.198.223.252, 35.158.16.93; UK: 3.10.129.9, 13.41.248.1, 13.134.18.10.
+Always confirm the current list in the documentation before sending it to a third party.
+
+## 10. Choosing Orchestrate vs other integration tools (Setup Considerations)
+
+Inbound/Outbound EIB (simple, one data source), template-based integrations and connectors
+(specific vendors / data types), Orchestrate for Integrations (web-based, low-code, high volume,
+custom logic and third-party APIs; separate from the tenant; needs Orchestrate training), Workday
+Studio (Eclipse IDE; longest build times), WWS SOAP API and REST API (external development).
+Non-EIB integrations need an ISU. The Integration Process Event business process controls
+integration runs; the Integration step launches integrations from business processes.
+Reports: View Integration System, View Integration Template, Integration Events, Integration
+Exception Audit.
+
+## 11. Integration events (tenant side)
+
+Integration Event: container of a run (job reference, status, messages, attached output files,
+launch parameters, timestamps); may include a main orchestration event and child integration
+events. Integration Process Event: the business process side (service steps such as Retrieval and
+Delivery). A child integration triggered by an orchestration calls back only when its Integration
+Process Event completes.

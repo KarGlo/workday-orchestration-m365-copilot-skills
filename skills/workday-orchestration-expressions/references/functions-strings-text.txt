@@ -1,0 +1,321 @@
+# Orchestrate Expression Language: member functions for strings and text
+
+Source: Workday Developer documentation, Integration Apps > Orchestrate Expression Language (retrieved 2026-10-02).
+Format of each entry: name(argument: Type, ...) -> ReturnType, followed by the documented behaviour.
+Global functions are called with their qualifier, for example lp.stringParam("Name"); functions without a qualifier are called by name.
+Member functions are appended to a value of the given type, for example data.Step.response.stringAtJsonPath("$.id").
+
+## String (member functions)
+
+- SHA256withRSASign(keystore: Data, alias: String, password: String) -> String
+  Returns the Base64 Encoded signature of the string using the SHA256withRSA algorithm and the supplied keystore, key alias, and keystore password.
+- SHA256withRSAVerify(signature: Data, keystore: Data, alias: String, password: String) -> Boolean
+  Returns true if the given Base 64 encoded signature verifies against the string using SHA256withRSA and the supplied keystore, key alias, and keystore password.
+- asCSV() -> Csv
+  Treats the document as CSV (of CsvTypeAny).
+- asCSV(schemaReference: String) -> Csv
+  Treats the document as CSV (of CsvTypeAny) and applies the specified CSV format.
+- asJSON() -> Json
+  Treats the document as JSON (of JsonTypeAny).
+- asXML() -> Xml
+  Treats the document as XML (of XmlTypeAny).
+- abbreviate(maxWidth: Number) -> String
+  Returns a string of length maxWidth, replacing the final 3 characters with '…'. Returns the whole string if maxWidth is less than or equal to string length. Throws an exception if maxWidth is less than 4. Examples for the string "Washington": string.abbreviate(6) = "Was..." string.abbreviate(1) = "W..."
+- append(str: String) -> String
+  Returns the string with the specified string appended.
+- camelCase(separator: String) -> String
+  Splits the string into parts by the separator, uppercases the first and lowercases the remaining characters of each part, and returns the reassembled string, including the separator.
+- camelCase(oldSeparator: String, newSeparator: String) -> String
+  Splits the string into parts by the old separator, uppercases the first and lowercases the remaining characters of each part, and returns the reassembled string with the old separator replaced by the new one.
+- capitalize() -> String
+  Returns a string with the first character converted to title case. Example for the string "miami": string.capitalize = "Miami" Example for the string "mIami": string.capitalize = "MIami"
+- contains(searchStr: String) -> Boolean
+  Returns true if a string contains the specified search string. Case sensitive. A null string returns null. Example for the string "Detroit": string.contains("D") = true Example for the string "detroit": string.contains("D") = false
+- containsIgnoreCase(searchStr: String) -> Boolean
+  Returns true if a string contains the specified search string. Ignores case. A null string returns null. Example for the string "Detroit": string.contains("D") = true Example for the string "detroit": string.contains("D") = true
+- defaultIfBlank(defaultStr: String) -> String
+  Returns a string, or if the string is whitespace, empty or null, returns the specified defaultStr. Example for the string "Chicago": string.defaultIfBlank("Unknown City") = "Chicago" Example for the string "": string.defaultIfBlank ("Unknown City") = "Unknown City"
+- defaultIfEmpty(defaultStr: String) -> String
+  Returns a string, or if the string is empty or null, returns the specified defaultStr. Examples for a null string: string.defaultIfEmpty("NULL") = "NULL" Example for the string "": string.defaultIfEmpty(null) = null
+- endsWith(suffix: String) -> Boolean
+  Returns true if a string ends with the specified suffix. Case sensitive. Examples for the string "Dallas": string.endsWith("as") = true string.endsWith("ll") = false
+- endsWithIgnoreCase(suffix: String) -> Boolean
+  Returns true if a string ends with the specified suffix. Ignores case. Examples for the string "Dallas": string.endsWithIgnoreCase("AS") = true string.endsWithIgnoreCase("As") = true
+- equals(stringValue: StringType) -> Boolean
+  Returns true if the string is equal to the specified string, including case.
+- equalsIgnoreCase(stringValue: StringType) -> Boolean
+  Returns true if the string is equal to the specified string, ignoring case.
+- escapeXml() -> String
+  Escapes characters from a string so it can be inserted into a valid XML document.
+- getCountryCodeFromLocale() -> String
+  Returns the country code from a locale. Example for the locale "en_US": locale.getCountryCodeFromLocale = "US"
+- includeCharactersUsingList(inclusionList: StringListType, defaultReplacement: StringType) -> String
+  Returns a string, replacing any characters not present in the inclusion list with the specified replacement. Characters that are on the inclusion list are returned unchanged.
+- indexOf(searchStr: String) -> Number
+  Returns the index of the first occurrence of the specified character within a string. Position counting begins at zero. A null string returns null. Examples for the string "Seattle": string.indexOf("S") = 0 string.indexOf("e") = 1
+- indexOf(searchStr: String, fromIndex: Number) -> Number
+  Returns the index of the first occurrence of the specified character within a string after the specified index. Position counting begins at zero. A null string returns null. Examples for the string "Seattle": string.indexOf("e", 4 ) = 6 string.indexOf("e", 0) = 1
+- isAllLowerCase() -> Boolean
+  Returns true if a string contains lower case characters only. Example for a null string: string.isAllLowerCase = false Example for the string "atlanta": string.isAllLowerCase = true
+- isAllUpperCase() -> Boolean
+  Returns true if a string contains upper case characters only. Example for a null string: string.isAllUpperCase = false Example for the string "Atlanta": string.isAllUpperCase = false
+- isBlank() -> Boolean
+  Returns true if a string is empty, null, or contains whitespace only. Example for the string "": string.isBlank = true Example for the string (" "): string.isBlank = true
+- isEmpty() -> Boolean
+  Returns true if a string is empty or null. Example for the string "": string.isEmpty = true Example for the string (" "): string.isEmpty = false
+- isNumber() -> Boolean
+  Returns true if the string is a valid Java number.
+- isNumeric() -> Boolean
+  Returns true if a string contains Unicode digits only. A null string returns false. A decimal point isn't a Unicode digit and returns false. Example for the string "778": string.isNumeric("778") = true Example for the string "-778": string.isNumeric = false
+- lastIndexOf(searchStr: String) -> Number
+  Returns the index of the last occurrence of the specified character within a string. Position counting begins at zero. A null string returns -1. Example for the string "Tampa": string.lastIndexOf("a") = 4 Example for a null string: string.lastIndexOf(*) = -1
+- lastindexOf(searchStr: String, fromIndex: Number) -> Number
+  Returns the index of the last occurrence of the specified character within a string, starting from the given index and working backwards. Position counting begins at zero. A null string returns -1. Example for the string "Philadelphia": string.lastIndexOf("a", 7) = 4 Example for a null string: string.lastIndexOf(*) = -1
+- leftPad(size: Number) -> String
+  Returns a string, left-padded with the specified number of spaces. Examples for the string "New York": string.leftPad(3) = " New York" string.leftPad(1) = " New York"
+- leftPad(size: Number, padChar: String) -> String
+  Returns a string, left-padded with the specified number of the specified character. Examples for the string "New York": string.leftPad(3, "*") = "***New York" string.leftPad(1, "X") = "XNew York"
+- length() -> Number
+  Returns string length. Returns 0 if the string is null. Example for the string "Tucson": string.length = 6 Example for the string "": string.length = 0
+- lowerCase() -> String
+  Returns a string converted to lower case. Example for the string "Memphis": string.lowerCase("Memphis") = "memphis" Example for the string "memPHis": string.lowerCase("meMPHis") = "memphis"
+- lowerCase(locale: String) -> String
+  Returns a string converted to lower case using the rules of the specified locale.
+- normalizeSpace() -> String
+  Returns the string with leading and trailing spaces removed, and any group of consecutive whitespace characters replaced by a single space.
+- pathEncode() -> String
+  Returns a string with non-ASCII characters escaped for use in URL path segments.
+- remove(remove: String) -> String
+  Returns a string with all occurrences of the specified substring removed. A null string returns null. An empty string returns the empty string. A null substring returns the string. An empty substring returns the string. Examples for the string "Orlando": string.remove("do") = "Orlan" string.remove("xyz") = "Orlando"
+- removeEnd(remove: String) -> String
+  Returns a string with the specified substring removed, provided the substring occurs at the end of the string. Otherwise returns the string. Case sensitive. A null string returns null. An empty string returns the empty string. A null substring returns the string. Examples for the string "Charlotte": string.removeEnd("te") = "Charlot" string.removeEnd("TE") = "Charlotte"
+- removeEndIgnoreCase(remove: String) -> String
+  Returns a string with the specified substring removed, provided the substring occurs at the end of the string. Otherwise returns the string. Ignores case. A null string returns null. An empty string returns the empty string. A null substring returns the string. Examples for the string "Charlotte": string.removeEndIgnoreCase("te") = "Charlot" string.removeEndIgnoreCase("TE") = "Charlot"
+- removeStart(remove: String) -> String
+  Returns a string with the specified substring removed, provided the substring occurs at the start of the string. Otherwise returns the string. Case sensitive. A null string returns null. An empty string returns the empty string. A null substring returns the string. Examples for the string "Charlotte": string.removeStart("Ch") = "arlotte" string.removeStart("CH") = "Charlotte"
+- removeStartIgnoreCase(remove: String) -> String
+  Returns a string with the specified substring removed, provided the substring occurs at the start of the string. Otherwise returns the string. Ignores case. A null string returns null. An empty string returns the empty string. A null substring returns the string. Examples for the string "Charlotte": string.removeStartIgnoreCase("Ch") = "arlotte" string.removeStartIgnoreCase("cH") = "arlotte"
+- replace(searchStr: String, replacement: String) -> String
+  Returns a string with all occurrences of the specified search string replaced with the specified replacement string. Case sensitive. A null reference passed to this method results in no operation. Examples for the string "Louisville": string.replace("L", "X") = "Xouisville" string.replace("LOUIS", "loUIS") = "Louisville"
+- replaceAndIncludeCharacters(mapping: StringMapType, defaultReplacement: StringType) -> String
+  Returns a string with characters replaced according to the provided mapping. If a character is missing from the provided string, the default string is returned in its place.
+- replaceCharactersUsingMapping(mapping: StringMapType) -> (return type not stated in the docs)
+  Return types: String Textl Returns a string with characters replaced according to the provided mapping. If a character isn't mapped, it's returned unchanged.
+- replaceIgnoreCase(searchStr: String, replacement: String) -> String
+  Returns a string with all occurrences of the specified search string replaced with the specified replacement string. Ignores case. A null reference passed to this method results in no operation. Examples for the string "Louisville": string.replace("L", "X") = "XouisviXXe" string.replace("LOUIS", "loUIS") = "loUISville"
+- replaceOnce(searchStr: String, replacement: String) -> String
+  Returns a string with the first occurrence of the specified search string replaced with the specified replacement string. Case sensitive. A null reference passed to this method results in no operation. Examples for the string "Louisville": string.replace("L", "X") = "Xouisville" string.replace("LOUIS", "loUIS") = "Louisville"
+- replaceOnceIgnoreCase(searchStr: String, replacement: String) -> String
+  Returns a string with the first occurrence of the specified search string replaced with the specified replacement string. Ignores case. A null reference passed to this method results in no operation. Examples for the string "Louisville": string.replace("L", "X") = "XouisviXXe" string.replace("LOUIS", "loUIS") = "loUISville"
+- reverse() -> String
+  Returns a string with the order of its characters reversed. A null string returns null. Examples for the string "Fresno": string.replace= "onserF"
+- rightPad(size: Number) -> String
+  Returns a string, right-padded with the specified number of spaces. Examples for the string "New York": string.rightPad(3) = "New York " string.rightPad(1) = "New York "
+- rightPad(size: Number, padChar: String) -> String
+  Returns a string, right-padded with the specified number of the specified character. Examples for the string "New York": string.rightPad(3, "*") = "New York***" string.rightPad(1, "X") = "New YorkX"
+- size() -> Number
+  Returns string length. Returns 0 if the string is null. Example for the string "Milwaukee": string.size = 9 Example for the string "": string.size = 0
+- split(separator: String) -> List
+  Returns a string split into an array, using the specified character as the separator. Adjacent separators are treated as 1 separator. A null string returns null. Example for the string "R.e.n.o": string.split(".") = ["R", "e", "n", "o"] Example for the string "R:e::n:::o": string.split(":") = ["R", "e", "n", "o"]
+- startsWith(prefix: String) -> Boolean
+  Returns true if a string starts with the specified prefix. Case sensitive. Examples for the string "Dallas": string.startsWith("Da") = true string.startsWith("DA") = false
+- startsWithIgnoreCase(prefix: String) -> Boolean
+  Returns true if a string starts with the specified prefix. Ignores case. Examples for the string "Dallas": string.startsWith("Da") = true string.startsWith("DA") = true
+- stripPrefix(prefix: String) -> String
+  Returns a string with the specified set of characters from its start. A null string returns null. An empty string returns the empty string. Examples for the string "San Diego": string.stripStart("San D") = "iego" string.stripStart(null) = "San Diego"
+- stripSuffix(suffix: String) -> String
+  Returns a string with the specified set of characters from its end. A null string returns null. An empty string returns the empty string. Examples for the string "San Diego": string.stripEnd("iego") = "San D" string.stripEnd(null) = "San Diego"
+- substring(start: Number) -> String
+  Returns a substring of a string, starting from the specified start position. Position counting begins at zero. A start position of -n indicates that the substring count begins n characters from the end of the string. A null string returns null. An empty string returns "". Examples for the string "Wichita": string.substring(0) = "Wichita" string.substring(3) = "hita"
+- substring(start: Number, end: Number) -> String
+  Returns a substring of a string, starting from the specified start position and ending before the specified end position. That is, the start index is inclusive and the end index is exclusive. Position counting begins at zero. A start or end position of -n indicates that the substring count begins or ends n characters from the end of the string. Returns "" if the start position is to the right of the end position. A null string returns null. An empty string returns "". Examples for the string "Wichita": string.substring(0,1) = "W" string.substring(3, 5) = "hi"
+- substringAfter(separator: String) -> String
+  Returns a substring of a string, beginning with the first occurrence of the specified separator. The separator isn't returned. A null string returns null. An empty string returns "". A null separator returns an empty string if the input string isn't null. Returns an empty string if there are no characters after the separator. Examples for the string "Wichita": string.substringAfter("i") = "chita" string.substringAfter("") = "Wichita"
+- substringAfterLast(separator: String) -> String
+  Returns a substring of a string, beginning with the last occurrence of the specified separator. The separator isn't returned. A null string returns null. An empty string returns "". A null separator returns an empty string if the input string isn't null. Returns an empty string if there are no characters after the separator. Examples for the string "Wichita": string.substringAfterLast("i") = "ta" string.substringAfterLast("p") = ""
+- substringBefore(separator: String) -> String
+  Returns a substring of a string, ending with the first occurrence of the specified separator. The separator isn't returned. A null string returns null. An empty string returns "". A null separator returns an empty string if the input string isn't null. Returns an empty string if there are no characters before the separator. Examples for the string "Wichita": string.substringBefore("i") = "W" string.substringBefore("") = ""
+- substringBeforeLast(separator: String) -> String
+  Returns a substring of a string, ending with the last occurrence of the specified separator. The separator isn't returned. A null string returns null. An empty string returns "". A null separator returns an empty string if the input string isn't null. Returns an empty string if there are no characters before the separator. Examples for the string "Wichita": string.substringBeforeLast("i") = "Wich" string.substringBefore(null) = "Wichita"
+- toBoolean() -> Boolean
+  Returns the string 'true' as Boolean true. Returns the string 'false' as boolean false. Ignores case. Throws an exception for any other value. Examples: string.toBoolean("True") = true string.toBoolean("FALSE") = false
+- toNumber() -> Number
+  Returns the numeric value represented by the string, provided it's a valid number. Throws an exception for strings that don't represent numbers. Examples: string.toNumber("8") = 8 string.toBoolean("15") = 15
+- toString() -> String
+  Returns a string representation of the value.
+- trim() -> String
+  Returns a string with control characters (code 32 or below in the ASCII table) removed from both ends. A null string returns null.
+- trimToEmpty() -> String
+  Returns a string with control characters (code 32 or below in the ASCII table) removed from both ends. Returns an empty string if the string is empty or null after the trim.
+- truncate(maxWidth: Number) -> String
+  Returns a string truncated to the specified maxWidth. Returns the whole string if the string length is less than maxWidth. Throws an exception if maxWidth is less than zero. Examples for the string "Anaheim": string.truncate(3) = "Ana" string.truncate(12) = "Anaheim"
+- truncate(offset: Number, maxWidth: Number) -> String
+  Returns a string truncated to the specified maxWidth starting at the specified index. Returns the whole string if the string length is less than maxWidth. Throws an exception if maxWidth or offset are less than zero. Examples for the string "Portland": string.truncate(3, 2) = "tl" string.truncate(2, 4) = "rtla"
+- uncapitalize() -> String
+  Returns a string with the first character converted to lower case. A null string returns null. Example for the string "Fort Worth": string.uncapitalize = "fort Worth" Example for the string "FORT WORTH": string.uncapitalize = "fORT WORTH"
+- unescapeXml() -> String
+  Unescapes characters that were escaped so they could be inserted into an xml document.
+- upperCase() -> String
+  Returns a string converted to upper case. A null string returns null. Example for the string "El Paso": string.upperCase = "EL PASO" Example for a null string: string.upperCase = null
+- upperCase(locale: String) -> String
+  Returns a string converted to upper case using the rules of the specified locale.
+- urlDecode() -> String
+  Returns a decoded application/x-www-form-urlencoded string. Uses a specific encoding scheme. The supplied encoding is used to determine what characters are represented by any consecutive sequences of the form "%xy".
+- urlEncode() -> String
+  Returns an encoded application/x-www-form-urlencoded string. Uses a specific encoding scheme. This method uses the supplied encoding scheme to obtain the bytes for unsafe characters.
+
+## Text (member functions)
+
+- batchIteratorByContainsAfter(contains: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that contain the specified string.
+- batchIteratorByContainsAfter(contains: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that contain the specified string. The lineEnding parameter defines the end of a line.
+- batchIteratorByContainsAt(contains: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that contain the specified string.
+- batchIteratorByContainsAt(contains: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that contain the specified string. The lineEnding parameter defines the end of a line.
+- batchIteratorByEndsWithAfter(endsWith: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that end with the specified string.
+- batchIteratorByEndsWithAfter(endsWith: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that end with the specified string. The lineEnding parameter defines the end of a line.
+- batchIteratorByEndsWithAt(endsWith: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that end with the specified string.
+- batchIteratorByEndsWithAt(endsWith: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that end with the specified string. The lineEnding parameter defines the end of a line.
+- batchIteratorByStartsWithAfter(startsWith: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that start with the specified string.
+- batchIteratorByStartsWithAfter(startsWith: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created after lines that start with the specified string. The lineEnding parameter defines the end of a line.
+- batchIteratorByStartsWithAt(startsWith: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that start with the specified string.
+- batchIteratorByStartsWithAt(startsWith: String, lineEnding: String) -> TextIterator
+  Returns an iterator of TextType instance batches. The batch is created at lines that start with the specified string. The lineEnding parameter defines the end of a line.
+- dropFirstAndLastLines(firstN: Number, lastN: Number) -> Text
+  Returns a new TextType instance with the first n and last n lines removed.
+- dropFirstAndLastLines(firstN: Number, lastN: Number, lineEnding: String) -> Text
+  Returns a new TextType instance with the first n and last n lines removed. The lineEnding parameter defines the end of a line.
+- dropFirstLines(firstN: Number) -> Text
+  Returns a new TextType instance with the first n lines removed.
+- dropFirstLines(firstN: Number, lineEnding: String) -> Text
+  Returns a new TextType instance with the first n lines removed. The lineEnding parameter defines the end of a line.
+- dropLines(n: Number) -> Text
+  Returns a new TextType instance with the specified number of lines removed from the end.
+- dropLines(n: Number, lineEnding: String) -> Text
+  Returns a new TextType instance with the specified number of lines removed from the end. The lineEnding parameter defines the end of a line.
+- dropLines(from: Number, to: Number) -> Text
+  Returns a new TextType instance with the lines between the specified points removed.
+- dropLines(from: Number, to: Number, lineEnding: String) -> Text
+  Returns a new TextType instance with the lines between the specified points removed. The lineEnding parameter defines the end of a line.
+- escapeToJsonString() -> Text
+  Returns the text escaped for JSON so it can be inserted into a document as a JSON field string value. Note: This function doesn't surround the resulting string with double quotes. Use toJsonStringValue to do that.
+- firstLine() -> Text
+  Returns the first line as a StringType instance.
+- firstLine() -> Text
+  Returns the first line as a StringType instance.The lineEnding parameter defines the end of a line.
+- htmlToPlainText() -> Text
+  Returns HTML input as readable plain text. Block-level elements (p, div, br, li, h1-h6) each produce a line break. Runs of consecutive block-level boundaries collapse to a single line break. Leading and trailing line breaks are trimmed. Inline elements are removed, retaining their text content. Runs of whitespace are collapsed to a single space. HTML entities are decoded. Example: " First Second " returns "First\nSecond".
+- includeCharactersUsingList(inclusionList: StringListType, defaultReplacement: StringType) -> Text
+  Returns a text file, replacing any characters not present in the inclusion list with the specified replacement. Characters that are on the inclusion list are returned unchanged.
+- lastLine() -> Text
+  Returns the last line as a StringType instance.
+- lastLine() -> Text
+  Returns the last line as a StringType instance.The lineEnding parameter defines the end of a line.
+- line(n: Number) -> String
+  Returns the line at the specified line number as a StringType instance.
+- line(n: Number, lineEnding: String) -> String
+  Returns the line at the specified line number as a StringType instance. The lineEnding parameter defines the end of a line.
+- lineCount() -> Number
+  Returns the number of lines in this TextType instance.
+- lineCount(lineEnding: String) -> Number
+  Returns the number of lines in this TextType instance. The lineEnding parameter defines the end of a line.
+- lines() -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance.
+- lines(from: Number, to: Number) -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance. Skips the lines between the specified points.
+- lines(from: Number) -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance. Starts at the specified point.
+- lines(lineEnding: String) -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance. The lineEnding parameter defines the end of a line.
+- lines(from: Number, to: Number, lineEnding: String) -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance. Starts at the specified point. Skips the lines between the specified points. The lineEnding parameter defines the end of a line.
+- lines(from: Number, lineEnding: String) -> StringIterator
+  Returns an iterator of StringIteratorType, which when used in a loop provides each line of text as a StringType instance. Starts at the specified point. The lineEnding parameter defines the end of a line.
+- removeEmptyLines() -> Text
+  Returns the text with empty lines removed. Works with \n, \r and \r\n line endings.
+- removeEmptyLines(lineSeparator: String) -> Text
+  Returns the text with empty lines removed according to the specified line separator.
+- replaceAndIncludeCharacters(mapping: StringMapType, defaultReplacement: StringType) -> Text
+  Returns a text file with characters replaced according to the provided mapping. If a character is missing from the provided document, the default string is returned in its place. Spaces and new lines are returned unchanged.
+- replaceCharactersUsingMapping(mapping: StringMapType) -> (return type not stated in the docs)
+  Return types: Text Returns a text file with characters replaced according to the provided mapping. If a character isn't mapped, it's returned unchanged.
+- stripHtmlTags() -> (return type not stated in the docs)
+  Return types: Text Returns the input text with all HTML/XML tags removed. Does not decode HTML entities. Example: "Hello world " returns "Hello world".
+- toJsonStringValue() -> Json
+  Returns the text escaped for JSON and surrounded in double quotes so it can be inserted into a JSON document as a field string value.
+
+## StringList (member functions)
+
+- add(element: String) -> StringList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: StringList) -> StringList
+  Returns a single list containing the elements of both lists combined.
+- contains(element: String) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> StringList
+  Returns a list of distinct elements from the list.
+- get(index: Number) -> String
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty, otherwise returns false.
+- iterator() -> String
+  Returns an iterator for elements in the list.
+- mkString(Separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- prepend(element: Number) -> StringList
+  Returns the list with the specified element prepended.
+- reverse() -> StringList
+  Returns the list with the order of its elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## StringMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> String
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: String) -> String
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: String) -> StringMap
+  Returns the map with the specified mapping added.
+- putAll(map: StringMap) -> StringMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> StringMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> StringList
+  Returns a list of the values in the map.
+
+## Boolean (member functions)
+
+- and(booleanValue: BooleanType) -> Boolean
+  Returns true if both boolean values are true.
+- not() -> Boolean
+  Returns the opposite value of the boolean.
+- or(booleanValue: BooleanType) -> Boolean
+  Returns true if either boolean value is true.
+- toString() -> String
+  Returns a string representation of the value.

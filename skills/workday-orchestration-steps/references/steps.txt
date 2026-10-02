@@ -1,0 +1,278 @@
+# Orchestration Builder components (steps): reference
+
+Sources: Workday Developer documentation, "Reference: <component>" pages and component concept
+pages for Extend and Integration apps, retrieved 2026-10-02. Internal (export) node names come
+from Workday's sample orchestration files.
+
+Template abbreviations: Sync = Synchronous, Async = Asynchronous, BP = Workday Business Process,
+HC = Workday Home Card, IS = Workday Integration System, Sub = suborchestration.
+Extend apps can use all five templates. Integration apps offer only BP and IS.
+
+Every step has a Reference Name; that name is how other steps reference its outputs
+(data.ReferenceName.output). Steps can be disabled for debugging (related actions > Disable).
+
+## Availability matrix
+
+| Component | Sync | Async | BP | HC | IS | Notes |
+| Send HTTP Request | y | y | y | y | y | external URLs only; not for Workday APIs |
+| Send Workday API Request | y | y | y | y | y | Workday REST/SOAP via the API gateway |
+| Send Paged HTTP Request | y | y | y | y | y | GET only |
+| Send Paged Workday REST Call | y | y | y | y | y | GET with limit/offset |
+| Send Paged Workday SOAP Call | y | y | y | y | y | paginated WWS |
+| Send Workday RaaS Request | - | y | y | - | y | not in join loops; not in suborchestrations; checkpoint |
+| Send Prism Request | - | y | y | - | y | pauses until the result |
+| Trigger Business Process | - | y | y | - | y | not in join loops; not in suborchestrations; checkpoint |
+| Trigger Integration | - | - | - | - | y | not in join loops; checkpoint |
+| Trigger PDF Generation | - | - | - | - | y | not in join loops; checkpoint |
+| Create Values | y | y | y | y | y | |
+| Create JSON | y | y | y | y | y | |
+| Create Text Template | y | y | y | y | y | |
+| Validate | y | y | y | y | y | does not stop the run |
+| Create Workday Home Card | - | - | - | y | - | Extend only |
+| Store Document | - | - | y | - | y | also suborchestrations (an older overview lists IS only) |
+| Find Documents | - | - | - | - | y | also suborchestrations |
+| Retrieve Document | - | - | y | - | y | also suborchestrations |
+| Loop | y | y | y | y | y | |
+| Batch Loop | y | y | y | y | y | |
+| Join Loop | y | y | y | y | y | joining dataset max 500 MB |
+| Branch on Conditions | y | y | y | y | y | |
+| Continue on Conditions | y | y | y | y | y | stops the run when false |
+| Log | y | y | y | y | y | |
+| Log to File | - | - | - | - | y | |
+| Add Integration Message | - | - | - | - | y | |
+| Call Suborchestration | y | y | y | y | y | same app only |
+| Invoke AWS Lambda Function | y | y | y | y | y | Extend Pro only |
+| Put Amazon EventBridge Event | y | y | y | y | y | Extend Pro only |
+| Get Amazon S3 Object | y | y | y | y | y | Extend Pro only |
+| Store Amazon S3 Object | y | y | y | y | y | Extend Pro only |
+
+Checkpoint steps start a new process (see design skill): Send Workday RaaS Request, Trigger PDF
+Generation, Trigger Business Process, Trigger Integration, Send HTTP Request with polling.
+
+## Common tabs of request steps
+
+Auth tab: a credential defined in the orchestration's Settings > Credentials, or the defaults
+offered by the step (for Workday steps: Default Workday API Credential, Access Token from
+Initiating User, or a named ISU credential).
+Body tab (3 options): Reference Existing Data (expression + Content Type); Create Text Template
+(Content Type + Message with {{ }} expressions); Form Multipart Body (indexed parts from 0, each
+with Select Data, Content Type, optional Content Disposition Parameters and Headers).
+Content types: application/json, application/octet-stream, application/x-www-form-urlencoded,
+application/xml, text/csv, text/html, text/plain, text/xml.
+Headers tab: name/value pairs. Query Parameters tab: key/value pairs appended after ? and joined
+with &.
+Settings tab: Overall Timeout, Connect Timeout, Response Timeout, Response Type, Retry Settings
+(a retry policy from Settings > HTTP Retries). Defaults documented for document steps and seen on
+API steps in samples: overall 300 s, connect 10 s, response 20 s.
+Advanced Mode checkbox reveals: Chunk encoding (only if the target supports chunked
+transfer-encoding); on Send HTTP Request also Polling Settings; on Send Workday API Request also
+Enable Wait for Long Running Response.
+
+## Data requests
+
+### Send HTTP Request  (export node: SendHttpRequest; older samples also show "Http")
+Purpose: HTTP request to any external URL you can authenticate with. TLS 1.3 with fallback to 1.2.
+Do not use it for Workday APIs — use Send Workday API Request.
+Methods: DELETE, GET, OPTIONS, PATCH, POST, PUT, HEAD. URL is a string expression.
+Polling (Advanced Mode): select an HTTP polling configuration; the run pauses until stop
+conditions or the polling duration (checkpoint). Polling isn't available for Workday APIs and
+can't be debugged with the step debugger.
+Auth for AWS services: AWS Signature v4 credential.
+
+### Send Workday API Request  (export node: SendWorkdayApiRequest)
+Purpose: requests to Workday APIs through the prepopulated Workday API address; you add the
+path, e.g. /staffing/v4/workers (Workday tutorial) with query parameter search=<name>.
+Methods: DELETE, GET, OPTIONS, PATCH, POST, PUT, HEAD.
+Enable Wait for Long Running Response (Advanced Mode): waits up to 1 hour for REST and 6 hours for
+SOAP responses; inside a loop it forces sequential iterations — enable only when needed.
+Gateway client timeout for synchronous Workday API calls: 5 minutes (REST, SOAP, RaaS, WQL),
+3 minutes for Graph API.
+Outputs: response, responseStatusCode (test with is2xxStatusCode(); SOAP faults with
+response.isSoapFault()).
+
+### Send Paged HTTP Request  (export node: SendHttpPaginationRequest)
+GET only. Pagination tab:
+- Offset: Limit, Limit Parameter Name (e.g. $.limit, $.per_page), Initial Offset, Offset
+  Parameter Name (e.g. $.offset, $.skip), Data Path (JSON path to the results array), Max Pages
+  (empty = all), Flatten result.
+- Cursor, three variants: token in response body (Next Page Parameter Name, Next Page Token Path,
+  Page Size Parameter Name/Value, Data Path, Max Pages, Flatten); next page URI in response body
+  (Next Page URI Path, URI Type absolute/partial, page size, Data Path, Max Pages, Flatten); next
+  page URI in HTTP Link header (Link Relationship Name, e.g. next; header must follow RFC 5988).
+Don't repeat in Query Parameters a key that the next-page URI already contains.
+
+### Send Paged Workday REST Call  (export node: SendWorkdayRestApiPaginationRequest)
+GET on a Workday REST path. General tab: credential, Limit, Offset, Max Pages, Flatten Result.
+Settings: Connect Timeout, Retry Settings.
+
+### Send Paged Workday SOAP Call  (export node: SendWwsPaginationApiRequest)
+General tab: Credential (Default Workday API Credential or Access Token from Initiating User),
+Service and Version of the web service, Include Invalid Reference Responses (true exposes
+Invalid_Reference_ID_Response). Body: Reference Existing Data or Create Body. Orchestrate adds the
+SOAP envelope automatically — adding <soapenv:Envelope> yourself makes the request invalid.
+
+### Send Workday RaaS Request  (export node: SendWorkdayRaasRequest)
+Long-running custom report; may take up to 1 hour without timing out the orchestration; the
+overall timeout resets when the response arrives. Add the report namespace/path as a string after
+the prepopulated address. Content Type on the General tab types the step output only — set the
+report format with a query parameter named `format`. A `dsa` segment in logged URLs is harmless.
+Not in join loops; not in suborchestrations.
+
+### Send Prism Request
+Long-running Prism request; processing pauses for the result. Same tabs as Send HTTP Request.
+
+### Trigger Business Process
+Target ID (the business object the custom business process runs on), ABP Name, Authentication.
+The business process must complete within 90 days. Workday recommends access tokens rather than
+ISU credentials with this step. Not in join loops; not in suborchestrations.
+
+### Trigger Integration  (export node: TriggerIntegration)
+IS template only. Child integration types: Workday-delivered packaged integrations, Workday Studio
+integrations, other Integration System orchestrations. EIBs aren't supported. Placement: top-level,
+error handlers, branches, loops, batch loops, suborchestrations — not join loops.
+Auth tab: Default Workday API Credential or Access Token from Initiating User. If the child
+integration system has an ISU, that ISU is the run-as user and the step's user is the initiating
+user (needs launch permission); otherwise the step's user is both.
+Launch Parameters tab: Manage Connections > connect to a tenant > link the child integration
+system > its launch parameters are imported and grouped by provider; supply values with
+expressions; "Send in Launch" per parameter; Refresh Launch Parameters re-imports definitions.
+Custom groups: Create Parameter Group (Provider ID, Provider Type).
+Document tab (pass one document): Document to Store, Document Title, Storage Expires In (default
+7 days, maximum 1 year, e.g. zoneddatetime.now().plusMonths(1)) are required; optional
+Description, Collection (default: new collection named by the child integration system WID),
+Tags (must already exist in the tenant), Add "Retrieved" Workday Tag (boolean).
+The child sees only that document and documents it creates.
+Retries cover failure to trigger, not failure of the child — relaunch failed children from an
+error handler. The parent pauses until the child's callback (its Integration Process Event must
+finish), then exposes status, integration messages and documents.
+
+### Trigger PDF Generation  (export node: TriggerPdfGeneration)
+IS only; not in join loops. Report Design (BIRT XML, e.g. from a Send Workday API Request) and
+Report Data (e.g. from Send Workday RaaS Request) are required. Optional: Business Form Layout WID
+(images and translations; its own design is ignored in favour of Report Design), Locale (en_US),
+Language (de_DE), Timezone (US/Eastern), Apply Report Design Per Row (page break per row).
+The PDF is the step's only output and isn't stored — add Store Document to keep it.
+
+## Data operations
+
+### Create Values  (export node: CreateValues)
+Key, Value (expression), Type (AutoType infers and follows changes). Keys without spaces.
+Independent values evaluate in parallel; dependent values sequentially — group them apart.
+
+### Create JSON  (export node: CreateJson)
+Create Structure (Root object, +Child / +Sibling; types Object, String, Number, Boolean, Array;
+values are literals, functions, conditions or step data) or Generate Structure (upload or paste a
+JSON sample, then edit). Output: data. In exports the structure is a JSON template resource with
+@PLACEHOLDER@ values plus JSONPath mappings.
+
+### Create Text Template  (export node: CreateTextTemplate)
+Content Type + Message with {{ }} expressions (full syntax in the expressions skill). Output:
+message.
+
+### Validate  (export nodes: Validate containing ValidationCheck)
+Per validation: Name, Validation (boolean expression), Severity (Warning or Error), Message.
+A failed validation doesn't stop the run. Outputs: allValid, anyError, anyWarning,
+failedValidations (iterator with name, severity, summary).
+
+### Create Workday Home Card
+HC template only. POWERED BY Source, Title, Subtitle, Link Destination, Link Text. Workday Home
+Cards outside development tenants require Workday Journeys.
+
+### Store Document  (export node: StoreDocument)
+General: Document to Store, Document Title, Description, Collection to Store Document In (default:
+integration event WID in IS; orchestration instance ID in other templates), Reference ID (groups
+documents for Find Documents; default orchestration instance ID), Storage Expires In, Tags
+(must exist in the tenant).
+Integration Event tab: Integration Event Source = Use Launch Event (IS only, IS default),
+Custom Integration Event (expression), None (default outside IS). In IS orchestrations the
+document is NOT attached to the event unless "Attach document to integration event" is true
+(enter boolean true, not the string). When associated: "Deliver from associated delivery
+services" and metadata (Owner, Content Type Reference, Document Type Reference, Severity,
+Secured Instances).
+Settings defaults: overall 300 s, connect 10 s, response 20 s, retry policy.
+Outputs: entryId, refId.
+
+### Find Documents
+Reference Id (matches Store Document's Reference ID); Collection: Launch Event Collection
+(default). Output: list of metadata (title, contentType, size, createdOn, expiresOn, collection,
+entryId); paging is automatic; content is fetched lazily when accessed.
+
+### Retrieve Document
+Collection + Entry Id (from Store Document). Output: document content and filename.
+
+## Orchestration logic
+
+### Loop  (export node: Loop)
+Data Type (iterator type; AutoType available), Data Set (expression), Filter, Sort By (several
+rules, ascending/descending; numbers numerically, text lexicographically), Locale (overrides the
+app's Default Locale for sorting). Item: data.Loop.item; iteration number: data.Loop.itemNumber.
+Early Stop Condition (related actions): stops iteration when the condition is true; output
+did.Stop.Early; optional Force Sequential Processing — iterations otherwise may run in parallel,
+and sequential processing can add significant time or cause a timeout.
+Aggregations (related actions > Add Aggregation): see settings.txt.
+
+### Batch Loop  (export node: BatchLoop)
+Strategy Size (Data Breakpoint Number), Custom (Form Batch At/After an item; Keep Leading Items
+keeps the items before the breakpoint as a batch), Group (Group By expressions, Group Name).
+Sorting applies within each batch. Locale as in Loop. Example from the docs, input [1..7], At 5:
+[5,6,7]; with Keep Leading Items: [1,2,3,4],[5,6,7]; After 5: [6,7] / [1,2,3,4,5],[6,7].
+
+### Join Loop  (export node: JoinLoop)
+Primary dataset (iterated) and one or more joining datasets (queried per primary record).
+Primary: Output Name, Iterator, Data Iterator Type; Multiple Match Strategy (Complete with Error,
+Skip Record, Use First, Use Last, Use All); Missing Match Strategy (Alternate Processing — test
+with isDataDefined —, Complete with Error, Skip Record); optional log messages.
+Joining: Primary Dataset Key, Iterator, Data Iterator Type, Joining Dataset Key, Return Value.
+Maximum joining dataset size 500 MB; put the dataset with unusually large records on the primary
+side. Functions: JoinResiduals and MatchedWith member functions.
+Not allowed inside: Send Workday RaaS Request, Trigger Business Process, Trigger Integration,
+Trigger PDF Generation.
+
+### Branch on Conditions  (export nodes: BranchOnConditions with WhenBranch)
+IF branch Condition; ELSE has no properties. Add Branch creates more IFs; evaluation left to
+right, only the first true branch runs; drag to reorder. "Enable outputs" exposes branch outputs
+downstream — every branch must output the same type. Keep nesting to 3 levels; extract deeper
+logic into a suborchestration.
+
+### Continue on Conditions  (export node: ContinueOnConditions)
+Assertion(s) + Message. False stops the orchestration and logs the message.
+
+### Log  (export node: Log)
+Message (one expression) + optional Condition. Messages appear in Run Logs (category console).
+
+### Log to File  (export node: LogToFile)
+IS only. Log Name, Condition, Format (a CSV format from Settings). Default columns: Timestamp,
+Severity, Message, Details. Default characters per this page: separator `,`, escape `/`, quote `"`
+(the CSV Formats page gives `\` as the default escape — check the actual setting). If a step fails
+outside any error handler, Orchestrate stores all named logs and attaches them to the integration
+event (logs stored earlier appear again; steps don't run twice).
+
+### Add Integration Message  (export node: SendIntegrationMessage)
+IS only. Severity (INFO default; CRITICAL, DEBUG, ERROR, WARNING), Summary, Detail, Condition.
+The message appears on the integration event's Messages tab in the tenant.
+
+### Call Suborchestration  (export node: CallSubflow)
+One calling component per suborchestration in the same app ("Call <Name>"). Provide a Value for
+each input Key; the suborchestration's outputs are listed for reference. A suborchestration sees
+only the inputs passed to it; the caller sees only its declared outputs.
+
+### Group (user-defined)  (export nodes: Group; implicit wrappers appear as ImplicitGroup)
+Select steps > Create Group; Reference Name, Description; collapse/expand; error handler on the
+group. Only the last step's outputs are visible downstream.
+
+## AWS components (Extend Pro only)
+
+Auth: a saved AWS Signature v4 credential or the default Assumed Role.
+- Invoke AWS Lambda Function (AwsLambdaInvoke): Function Name (full or partial ARN, e.g.
+  my-function or arn:aws:lambda:us-west-2:123456789012:function:my-function:1.0), Payload (JSON
+  object or array, max 6 MB), Return of Log Tail? (adds up to 4 KB base64 CloudWatch log), Dry
+  Run? (permission test: DryRun-Operation if allowed, UnauthorizedOperation otherwise). Outputs:
+  HTTP Response Code, HTTP Response Body (application/json), Function Error, Executed Version,
+  Log Result.
+- Put Amazon EventBridge Event (AwsEventBridgePutEvent): events with Event Bus Name, Detail
+  (JSON), Detail Type, Source, AWS Resources (ARNs). Outputs: HTTP Response Code, empty Body,
+  Event ID, empty Error Code/Message, Request ID (x-amzn-RequestId).
+- Get Amazon S3 Object (AwsS3GetObject): Bucket, Filepath, Response Type (Any, Text, Json, Xml,
+  Csv). Outputs: HTTP Response Code, Response, ETag, Content-Type, Last-Modified.
+- Store Amazon S3 Object (AwsS3StoreObject): Bucket, Filepath, Request Body, Content Type Override.
+  Outputs: HTTP Response Code, ETag, Version ID (null without bucket versioning).

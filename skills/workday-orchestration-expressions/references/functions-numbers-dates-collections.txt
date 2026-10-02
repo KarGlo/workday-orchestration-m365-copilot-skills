@@ -1,0 +1,594 @@
+# Orchestrate Expression Language: member functions for numbers, dates and collections
+
+Source: Workday Developer documentation, Integration Apps > Orchestrate Expression Language (retrieved 2026-10-02).
+Format of each entry: name(argument: Type, ...) -> ReturnType, followed by the documented behaviour.
+Global functions are called with their qualifier, for example lp.stringParam("Name"); functions without a qualifier are called by name.
+Member functions are appended to a value of the given type, for example data.Step.response.stringAtJsonPath("$.id").
+
+## BigDecimal (member functions)
+
+- divide(divisor: BigDecimal, scale: Number, roundingMode: String) -> BigDecimal
+  Returns the value of the BigDecimal divided by the specified divisor, using the specified rounding mode when it's required to generate a result at the given scale. A scale of 3 means 3 digits after the decimal point. The number 1.2345 at scale 2 is 1.23. The value 0.0045 is said to be discarded. There are 7 types of rounding modes, 4 directional, 2 nearest neighbor, and 1 other. The directional rounding modes: UP : Rounds away from zero if there are discarded digits. Examples: 5.811 at scale 1rounds to 5.9. -10.0001 at scale 3 rounds to -10.001. DOWN : Rounds towards zero by truncating the discarded digits. Examples: 12.99 at scale 1rounds to 12.9. -0.54321 at scale 3 rounds to -0.543. CEILING : Rounds towards positive infinity. If the number is positive, behaves like UP . Example: 8.7651 at scale 3 rounds to 8.766. If the number is negative, behaves like DOWN . Example: -3.48 at scale 1 rounds to -3.4. FLOOR : Rounds towards negative infinity. If the number is positive, behaves like DOWN . Example: 45.19 at scale 1rounds to 45.1. If the number is negative, behaves like UP . Example: -9.876 at scale 2rounds to -9.88. The nearest neighbor rounding modes: HALF_UP : Rounds towards the nearest neighbor. Rounds up if the discarded digits are greater than or equal to 5. Examples: 9.153 at scale 2 rounds to 9.15. 99.5 at scale 0 rounds to 100. HALF_DOWN : Rounds towards the nearest neighbor. Rounds up if the discarded digits are greater than 5. Rounds down if the discarded digits are equal to 5. Examples: 16.0851 at scale 3 is 16.086. 17.05 at scale 1 rounds to 17. HALF_EVEN : Rounds to the nearest neighbor. Rounds to the last retained even digit if the discarded digits are equal to 0.5. Examples: 7.135 at scale 2 rounds to 7.14. 17.5 at scale 0 rounds to 18. The other rounding mode: UNNECESSARY : Requires an exact result that doesn't need rounding. Throws an exception if the result isn't exact.
+- negate() -> BigDecimal
+  Returns the negation of the BigDecimal value.
+- power(n: Number) -> BigDecimal
+  Returns the value of the BigDecimal raised to the power of the specified number.
+- precision() -> Number
+  Returns the number of digits in the unscaled BigDecimal value. The precision of a zero value is 1.
+- remainder(divisor: BigDecimal) -> BigDecimal
+  Returns the value of the remainder when the BigDecimal is divided by the specified divisor.
+- scale() -> Number
+  Returns the scale of the BigDecimal. If the BigDecimal is zero or positive, the scale is the number of digits to the right of the decimal point. If it's negative, the unscaled value of the number is multiplied by 10 to the power of the negation of the scale.
+- toString() -> String
+  Returns a string representation of the value.
+
+## Number (member functions)
+
+- abs() -> Number
+  Returns the absolute value of the specified number.
+- ceil() -> Number
+  Returns the smallest integer that is less than or equal to the specified number.
+- currencyFormat(locale: String) -> String
+  Returns the number as a currency using the specified locale. Example: en_US.
+- equals(N: Number) -> Boolean
+  Returns true if the number is equal to the specified number.
+- floor() -> Number
+  Returns the largest integer that is less than or equal to the specified number.
+- format(pattern: String) -> String
+  Returns the number as a string using the specified format. See: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/text/DecimalFormat.html
+- greaterThan(N: Number) -> Boolean
+  Returns true if the number is greater than the specified number.
+- greaterThanOrEquals(N: Number) -> Boolean
+  Returns true if the number is greater than or equal to the specified number.
+- is2xxStatusCode() -> Boolean
+  Returns true if the number is an integer in the range 200 to 299.
+- lessThan(N: Number) -> Boolean
+  Returns true if the number is less than the specified number.
+- lessThanOrEquals(N: Number) -> Boolean
+  Returns true if the number is less than or equal to the specified number.
+- notEquals(N: Number) -> Boolean
+  Returns true if the number is not equal to the specified number.
+- round() -> Number
+  Returns the number rounded to the closest integer. If the fractional part is 0.5, the number is rounded up.
+- roundHalfToEven() -> Number
+  Returns the number rounded to the closest integer, rounding even halves to the nearest even number.
+- toBigDecimal() -> Number
+  Returns the value of the number as a BigDecimal, which might involve a narrowing primitive conversion.
+- toDouble() -> Number
+  Returns the value of the number as a Double, which might involve a narrowing primitive conversion.
+- toFloat() -> Number
+  Returns the value of the number as a Float, which might involve a narrowing primitive conversion.
+- toInt() -> Number
+  Returns the value of the number as an Integer, which might involve a narrowing primitive conversion.
+- toLong() -> Number
+  Returns the value of the number as a Long, which might involve a narrowing primitive conversion.
+- toString() -> String
+  Returns a string representation of the value.
+- trunc() -> Number
+  Returns the number rounded to the nearest integer by truncating the fractional part.
+
+## NumberList (member functions)
+
+- add(element: Number) -> NumberList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: NumberList) -> NumberList
+  Returns a single list containing the elements of both lists combined.
+- average() -> Number
+  Returns the average value of a number list.
+- contains(element: Number) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> NumberList
+  Returns a list of distinct elements in the list.
+- get(index: Number) -> Number
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty, otherwise returns false.
+- iterator() -> NumberIterator
+  Returns an interator for elements in the list.
+- max() -> Number
+  Returns the largest value in a number list.
+- min() -> Number
+  Returns the lowest value in a number list.
+- mkString(Separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- prepend(element: Number) -> NumberList
+  Returns the list with the specified element prepended.
+- reverse() -> NumberList
+  Returns the list with the order of its elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- sum() -> Number
+  Returns the sum of the values in the number list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## NumberMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- get(key: String) -> Number
+  Returns the value of the specified key, if one exists.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- getOrElse(key: String, default: Number) -> Number
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: Number) -> NumberMap
+  Returns the map with the specified mapping added.
+- putAll(map: NumberMap) -> NumberMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> NumberMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> NumberList
+  Returns a list of the values in the map.
+
+## BooleanList (member functions)
+
+- add(element: Boolean) -> BooleanList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: BooleanList) -> BooleanList
+  Returns a single list with the elements of both lists combined.
+- and() -> Boolean
+  Returns true if all of the boolean values in the specified list are true, otherwise returns false. Also returns false if the specified list is empty.
+- contains(element: BooleanList) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> BooleanList
+  Returns a list of distinct elements from the list.
+- get(index: Number) -> Boolean
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty, otherwise returns false.
+- iterator() -> BooleanIterator
+  Returns an iterator for elements in the list.
+- mkString(Separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- or() -> Boolean
+  Returns true if at least 1 of the boolean values in the specified list is true, otherwise returns false. Also returns false if the specified list is empty.
+- prepend(element: Boolean) -> BooleanList
+  Returns the list with the specified element prepended.
+- reverse() -> String
+  Returns the list with the order of its elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## BooleanMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> Boolean
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: Boolean) -> Boolean
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: Boolean) -> BooleanMap
+  Returns the map with the specified mapping added.
+- putAll(map: BooleanMap) -> BooleanMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> BooleanMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> BooleanList
+  Returns a list of the values in the map.
+
+## Date (member functions)
+
+- diffDays(other: Date) -> Number
+  Returns the number of days between the specified date and the instance date.
+- diffMonths(other: Date) -> Number
+  Returns the number of months between the specified date and the instance date
+- diffWeeks(other: Date) -> Number
+  Returns the number of weeks between the specified date and the instance date
+- diffYears(other: Date) -> Number
+  Returns the number of years between the specified date and the instance date
+- format(pattern: String) -> String
+  Returns the date formatted according to the specified pattern. Examples: ISO_LOCAL_DATE, yyyy-MM-dd.
+- getDayOfMonth() -> Number
+  Returns the primitive integer value for the day of the month.
+- getDayOfWeek() -> String
+  Returns the enum value for the day of the week.
+- getDayOfYear() -> Number
+  Returns the primitive integer value for the day of the year.
+- isAfter(other: Date) -> Boolean
+  Returns true if the specified date is after the instance date.
+- isBefore(other: Date) -> Boolean
+  Returns true if the specified date is before the instance date.
+- isEqual(other: Date) -> Boolean
+  Returns true if the specified date is the same as the instance date.
+- minusDays(daysToSubtract: Number) -> Date
+  Returns a copy of LocalDate with the specified number of days subtracted.
+- minusMonths(monthsToSubtract: Number) -> Date
+  Returns a copy of LocalDate with the specified number of months subtracted. If the resulting date is invalid because of the number of days in that month, returns the last valid date of that month.
+- minusWeeks(weeksToSubtract: Number) -> Date
+  Returns a copy of LocalDate with the specified number of weeks subtracted.
+- minusYears(yearsToSubtract: Number) -> Date
+  Returns a copy of LocalDate with the specified number of years subtracted. If the resulting date is invalid because of a leap year, returns the last valid date of that month.
+- plusDays(daysToAdd: Number) -> Date
+  Returns a copy of LocalDate with the specified number of days added.
+- plusMonths(monthsToAdd: Number) -> Date
+  Returns a copy of LocalDate with the specified number of months added. If the resulting date is invalid because of the number of days in that month, returns the last valid date of that month.
+- plusWeeks(weeksToAdd: Number) -> Date
+  Returns a copy of LocalDate with the specified number of weeks added.
+- plusYears(yearsToAdd: Number) -> Date
+  Returns a copy of LocalDate with the specified number of years added. If the resulting date is invalid because of a leap year, returns the last valid date of that month.
+- toString() -> String
+  Returns a string representation of the value.
+- toXMLDate() -> String
+  Returns the date as a string in the ISO-8601 format yyyy-MM-dd .
+
+## DateList (member functions)
+
+- add(element: Date) -> DateList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: DateList) -> DateList
+  Returns a single list with the elements of the specified list combined.
+- contains(element: Date) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> DateList
+  Returns a list of distinct elements in the list.
+- get(index: Number) -> Date
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty.
+- iterator() -> DateIterator
+  Returns an iterator for the elements in the list.
+- mkString(separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- prepend(element: Date) -> DateList
+  Returns the list with the specified element prepended.
+- reverse() -> DateList
+  Returns the list with the order of the elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## DateMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> Date
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: Date) -> Date
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: Date) -> DateMap
+  Returns the map with the specified mapping added.
+- putAll(map: DateMap) -> DateMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> DateMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> DateList
+  Returns a list of the values in the map.
+
+## LocalDateTime (member functions)
+
+- atZone(ZoneId: String) -> ZonedDateTime
+  Returns the date-time combined with the specified time-zone to create a ZonedDateTime .
+- diffDays(other: LocalDateTime) -> Number
+  Returns the number of days between the specified LocalDateTime and the instance LocalDateTime.
+- diffHours(other: LocalDateTime) -> Number
+  Returns the number of hours between the specified LocalDateTime and the instance LocalDateTime.
+- diffMinutes(other: LocalDateTime) -> Number
+  Returns the number of minutes between the specified LocalDateTime and the instance LocalDateTime.
+- diffMonths(other: LocalDateTime) -> Number
+  Returns the number of months between the specified LocalDateTime and the instance LocalDateTime.
+- diffSeconds(other: LocalDateTime) -> Number
+  Returns the number of years between the specified LocalDateTime and the instance LocalDateTime.
+- diffWeeks(other: LocalDateTime) -> Number
+  Returns the number of weeks between the specified LocalDateTime and the instance LocalDateTime.
+- diffYears(other: LocalDateTime) -> Number
+  Returns the number of years between the specified LocalDateTime and the instance LocalDateTime.
+- format(Pattern: String) -> String
+  Returns the date-time formatted according to the specified pattern.
+- isAfter(other: LocalDateTime) -> Boolean
+  Returns true if the specified LocalDateTime is after the instance LocalDateTime.
+- isBefore(other: LocalDateTime) -> Boolean
+  Returns true if the specified LocalDateTime is before the instance LocalDateTime.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- isEqual(other: LocalDateTime) -> Boolean
+  Returns true if the specified LocalDateTime is the same as the instance LocalDateTime.
+- minusDays(Days: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of days subtracted.
+- minusHours(Hours: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of hours subtracted.
+- minusMinutes(Minutes: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of minutes subtracted.
+- minusMonths(Months: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of months subtracted.
+- minusSeconds(Seconds: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of seconds subtracted.
+- minusWeeks(Weeks: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of weeks subtracted.
+- minusYears(Years: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of years subtracted.
+- plusDays(Days: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of days added.
+- plusHours(Hours: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of hours added.
+- plusMinutes(Minutes: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of minutes added.
+- plusMonths(Months: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of months added.
+- plusSeconds(Seconds: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of seconds added.
+- plusWeeks(Weeks: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of weeks added.
+- plusYears(Years: Number) -> LocalDateTime
+  Returns a copy of LocalDateTime with the specified number of years added.
+- toDate() -> DateType
+  Returns the LocalDate part of the date-time, ignoring time.
+- toLocalTime() -> LocalTimeType
+  Returns the LocalTime part of the date-time, ignoring date.
+- toString() -> String
+  Returns the date and time as a string in one of these ISO-8601 formats: uuuu-MM-dd'T'HH:mm uuuu-MM-dd'T'HH:mm:ss uuuu-MM-dd'T'HH:mm:ss.SSS uuuu-MM-dd'T'HH:mm:ss.SSSSSS uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSS The format used is the shortest that outputs the full value of the date and time, omitting trailing zeroes.
+- toXMLDateTime() -> String
+  Returns a string representation of the date in the ISO Local Date Time format.
+
+## LocalDateTimeListType (member functions)
+
+- add(element: LocalDateTime) -> LocalDateTimeList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: LocalDateTimeList) -> LocalDateTimeList
+  Returns a single list with the elements of both lists combined.
+- contains(element: LocalDateTime) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> LocalDateTimeList
+  Returns a list of distinct elements from the list.
+- get(index: Number) -> LocalDateTime
+  Returns the element at the specified index.
+- iterator() -> LocalDateTimeIterator
+  Returns an iterator for elements in the list.
+- prepend(element: LocalDateTime) -> LocalDateTimeList
+  Returns the list with the specified element prepended.
+- reverse() -> LocalDateTimeList
+  Returns the list with the order of its elements reversed.
+
+## LocalDateTimeMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> LocalDateTime
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: LocalDateTime) -> LocalDateTime
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: LocalDateTime) -> LocalDateTimeMap
+  Returns the map with the specified mapping added.
+- putAll(map: LocalDateTimeMap) -> LocalDateTimeMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> LocalDateTimeMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values(key: String) -> LocalDateTimeList
+  Returns a list of the values in the map.
+
+## LocalTime (member functions)
+
+- format() -> String
+  Returns the local time formatted in the pattern HH:mm:ss.
+- format(Pattern: String) -> String
+  Returns the time formatted according to the specified pattern.
+- isAfter(other: LocalTime) -> Boolean
+  Returns true if this LocalTime value is later than the specified time.
+- isBefore(other: LocalTime) -> Boolean
+  Returns true if this LocalTime value is earlier than the specified time.
+- isEqual(other: LocalTime) -> Boolean
+  Returns true if this LocalTime value is the same as the specified time.
+- toString() -> String
+  Returns the time value as a string in one of these ISO-8601 formats: HH:mm HH:mm:ss HH:mm:ss.SSS HH:mm:ss.SSSSSS HH:mm:ss.SSSSSSSSS The format used is the shortest that outputs the full value of the time, omitting trailing zeroes.
+
+## LocalTimeList (member functions)
+
+- add(element: LocalTime) -> LocalTimeList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: LocalTimeList) -> LocalTimeList
+  Returns a single list with the elements of both lists combined.
+- contains(element: LocalTime) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> LocalTimeList
+  Returns a list of distinct elements from the list.
+- get(index: Number) -> LocalTime
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty, otherwise returns false.
+- iterator() -> LocalTimeIterator
+  Returns an iterator for elements in the list.
+- mkString(Separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- prepend(element: LocalTime) -> LocalTimeList
+  Returns the list with the specified element prepended.
+- reverse() -> LocalTimeList
+  Returns the list with the order of its elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## LocalTimeMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> LocalTime
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: LocalTime) -> LocalTime
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: LocalTime) -> LocalTimeMap
+  Returns the map with the specified mapping added.
+- putAll(map: LocalTimeMap) -> LocalTimeMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> LocalTimeMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> LocalTimeList
+  Returns a list of the values in the map.
+
+## ZonedDateTime (member functions)
+
+- atZone(zoneid: String) -> ZonedDateTime
+  Returns the date-time combined with the specified time-zone to create a ZonedDateTime .
+- diffDays(other: ZonedDateTime) -> Number
+  Returns the number of days between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffHours(other: ZonedDateTime) -> Number
+  Returns the number of hours between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffMinutes(other: ZonedDateTime) -> Number
+  Returns the number of minutes between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffMonths(other: ZonedDateTime) -> Number
+  Returns the number of months between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffSeconds(other: ZonedDateTime) -> Number
+  Returns the number of years between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffWeeks(other: ZonedDateTime) -> Number
+  Returns the number of weeks between the specified ZonedDateTime and the instance ZonedDateTime.
+- diffYears(other: ZonedDateTime) -> Number
+  Returns the number of years between the specified ZonedDateTime and the instance ZonedDateTime.
+- format(pattern: String) -> String
+  Returns the zoned date-time formatted according to the specified pattern.
+- isAfter(other: ZonedDateTime) -> Boolean
+  Returns true if the specified ZonedDateTime is after the instance ZonedDateTime.
+- isBefore(other: ZonedDateTime) -> Boolean
+  Returns true if the specified ZonedDateTime is before the instance ZonedDateTime.
+- isEqual(other: ZonedDateTime) -> Boolean
+  Returns true if the specified ZonedDateTime is the same as the instance ZonedDateTime.
+- minusDays(days: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of days subtracted.
+- minusHours(hours: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of hours subtracted.
+- minusMinutes(minutes: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of minutes subtracted.
+- minusMonths(months: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of months subtracted.
+- minusSeconds(seconds: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of seconds subtracted.
+- minusWeeks(weeks: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of weeks subtracted.
+- minusYears(years: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of years subtracted.
+- plusDays(days: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of days added.
+- plusHours(hours: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of hours added.
+- plusMinutes(minutes: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of minutes added.
+- plusMonths(months: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of months added.
+- plusSeconds(seconds: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of seconds added.
+- plusWeeks(weeks: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of weeks added.
+- plusYears(years: Number) -> ZonedDateTime
+  Returns a copy of ZonedDateTime with the specified number of years added.
+- toDate() -> Date
+  Returns the LocalDate part of the date-time, ignoring time.
+- toLocalTime() -> LocalTime
+  Returns the LocalTime part of the date-time, ignoring date.
+- toString() -> String
+  Returns the LocalDateTime followed by the ZoneOffset . Returns the ZoneId if that ID doesn't match the offset. The output string is compatible with ISO-8601 if the offset and ID match.
+- toXMLDateTime() -> String
+  Returns a string representation of the date in the ISO Offset Date Time format.
+
+## ZonedDateTimeList (member functions)
+
+- add(element: ZonedDateTime) -> ZonedDateTimeList
+  Returns the list with the specified element appended.
+- addAll(listToAppend: ZonedDateTimeList) -> ZonedDateTimeList
+  Returns a single list with the elements of both lists combined.
+- contains(element: ZonedDateTime) -> Boolean
+  Returns true if the list contains the specified element.
+- distinct() -> ZonedDateTimeList
+  Returns a list of distinct elements from the list.
+- get(index: Number) -> ZonedDateTime
+  Returns the element at the specified index.
+- isEmpty() -> Boolean
+  Returns true if the list is empty, otherwise returns false.
+- iterator() -> ZonedDateTimeIterator
+  Returns an iterator for elements in the list.
+- mkString(Separator: String) -> String
+  Returns a string formed from the entries in the list, separated by the specified separator.
+- prepend(element: ZonedDateTime) -> ZonedDateTimeList
+  Returns the list with the specified element prepended.
+- reverse() -> ZonedDateTimeList
+  Returns the list with the order of its elements reversed.
+- size() -> Number
+  Returns the number of items in the list.
+- toJsonArray() -> Json
+  Returns the items in the list as a JSON array.
+- toString() -> String
+  Returns a string representation of the value.
+
+## ZonedDateTimeMap (member functions)
+
+- canonicalParams() -> String
+  Returns a string of the map items represented as parameters.
+- containsKey(key: String) -> Boolean
+  Returns true if the map has an entry associated with the specified key.
+- get(key: String) -> ZonedDateTime
+  Returns the value of the specified key, if one exists.
+- getOrElse(key: String, default: ZonedDateTime) -> ZonedDateTime
+  Returns the value of the specified key, if one exists. Otherwise returns the specified default.
+- isEmpty() -> Boolean
+  Returns true if the map is empty.
+- keys() -> StringList
+  Returns a list of the map's keys.
+- put(key: String, value: ZonedDateTime) -> ZonedDateTimeMap
+  Returns the map with the specified mapping added.
+- putAll(map: ZonedDateTimeMap) -> ZonedDateTimeMap
+  Returns the map with all of the specified mappings added.
+- remove(key: String) -> ZonedDateTimeMap
+  Returns the map with the specified mapping removed.
+- size() -> Number
+  Returns the number of entries in the map.
+- toString() -> String
+  Returns a string representation of the value.
+- values() -> ZonedDateTimeList
+  Returns a list of the values in the map.
