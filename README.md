@@ -32,6 +32,44 @@ LICENSE · NOTICE.md · licenses/
 Each skill folder has a `SKILL.md` (instructions, under the 20,000-character limit) and a
 `references/` folder with `.txt` files the skill reads when it needs them.
 
+## Set up by copy and paste (no downloads)
+
+Every file below can be copied as text in the browser — nothing is saved to the computer.
+For each file, either open the **raw text** link and copy everything (**Ctrl+A**, **Ctrl+C**), or
+open the file name and use the **Copy raw file** button (two-squares icon) above its content.
+Use this list for the setup in "Set up variant A when Skills accepts `.md` files" below.
+
+- **Instructions** and **Skills**: paste straight into Agent Builder if it offers a text field.
+  If Skills only accepts a file, paste into Notepad and save as `SKILL.md` with
+  **Save as type: All files** (otherwise Notepad adds `.txt`); keep each skill in its own folder.
+- **Attachments**: paste each file into Notepad and save it under **exactly** the name shown — the
+  skills look the files up by name.
+- `functions-structured-data.txt` is about 54 KB; after pasting, check that the end of the file
+  arrived too.
+
+| # | File | Where it goes | Text |
+| --- | --- | --- | --- |
+| 1 | [`instructions-with-skills.md`](agent/instructions-with-skills.md) | **Instructions** — paste the text | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/agent/instructions-with-skills.md) |
+| 2 | [`workday-orchestration-design / SKILL.md`](skills/workday-orchestration-design/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-design/SKILL.md) |
+| 3 | [`workday-orchestration-steps / SKILL.md`](skills/workday-orchestration-steps/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-steps/SKILL.md) |
+| 4 | [`workday-orchestration-expressions / SKILL.md`](skills/workday-orchestration-expressions/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/SKILL.md) |
+| 5 | [`workday-orchestration-errors-debugging / SKILL.md`](skills/workday-orchestration-errors-debugging/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-errors-debugging/SKILL.md) |
+| 6 | [`workday-orchestration-review / SKILL.md`](skills/workday-orchestration-review/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-review/SKILL.md) |
+| 7 | [`workday-wdcli / SKILL.md`](skills/workday-wdcli/SKILL.md) | **Skills > Add** — paste, or save as `SKILL.md` and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-wdcli/SKILL.md) |
+| 8 | [`platform.txt`](skills/workday-orchestration-design/references/platform.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-design/references/platform.txt) |
+| 9 | [`recipes.txt`](skills/workday-orchestration-design/references/recipes.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-design/references/recipes.txt) |
+| 10 | [`steps.txt`](skills/workday-orchestration-steps/references/steps.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-steps/references/steps.txt) |
+| 11 | [`settings.txt`](skills/workday-orchestration-steps/references/settings.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-steps/references/settings.txt) |
+| 12 | [`syntax.txt`](skills/workday-orchestration-expressions/references/syntax.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/references/syntax.txt) |
+| 13 | [`functions-global.txt`](skills/workday-orchestration-expressions/references/functions-global.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/references/functions-global.txt) |
+| 14 | [`functions-strings-text.txt`](skills/workday-orchestration-expressions/references/functions-strings-text.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/references/functions-strings-text.txt) |
+| 15 | [`functions-structured-data.txt`](skills/workday-orchestration-expressions/references/functions-structured-data.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/references/functions-structured-data.txt) |
+| 16 | [`functions-numbers-dates-collections.txt`](skills/workday-orchestration-expressions/references/functions-numbers-dates-collections.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-expressions/references/functions-numbers-dates-collections.txt) |
+| 17 | [`errors-debugging.txt`](skills/workday-orchestration-errors-debugging/references/errors-debugging.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-errors-debugging/references/errors-debugging.txt) |
+| 18 | [`review.txt`](skills/workday-orchestration-review/references/review.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-orchestration-review/references/review.txt) |
+| 19 | [`wdcli.txt`](skills/workday-wdcli/references/wdcli.txt) | **Knowledge > Attachments** — save under this exact name and upload | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/skills/workday-wdcli/references/wdcli.txt) |
+| 20 | [`agent-profile.md`](agent/agent-profile.md) | Name, Description, Starter prompts — retype | [raw text](https://raw.githubusercontent.com/KarGlo/workday-orchestration-m365-copilot-skills/main/agent/agent-profile.md) |
+
 ## Choose a variant
 
 | | Variant A — custom skills | Variant B — knowledge files |
